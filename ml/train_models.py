@@ -297,6 +297,184 @@ def evaluate_kmeans(model, X_scaled):
     }
 
 
+def build_dashboard_report(raw_df: pd.DataFrame | None, feat_df: pd.DataFrame, data_paths: list[str]):
+    if raw_df is not None and not raw_df.empty:
+        event_type = raw_df["event_type"].fillna("unknown")
+        total_events = int(len(raw_df))
+        unique_users = int(raw_df["user_id"].nunique()) if "user_id" in raw_df.columns else 0
+        view_count = int((event_type == "view").sum())
+        cart_count = int((event_type == "cart").sum())
+        purchase_count = int((event_type == "purchase").sum())
+
+        if {"user_id", "user_session"}.issubset(raw_df.columns):
+            sess = raw_df.groupby(["user_id", "user_session"]) ["event_type"]
+            has_purchase = sess.apply(lambda x: (x == "purchase").any())
+            has_cart = sess.apply(lambda x: (x == "cart").any())
+            purchase_rate = float(has_purchase.mean()) if len(has_purchase) else 0.0
+            total_sessions = int(len(has_purchase))
+            purchased_sessions = int(has_purchase.sum())
+            cart_sessions = int(has_cart.sum())
+            carts_total = int(has_cart.sum())
+            carts_no_purchase = int((has_cart & ~has_purchase).sum())
+            cart_abandonment = (carts_no_purchase / carts_total) if carts_total else 0.0
+            abandoned_cart_sessions = carts_no_purchase
+        else:
+            purchase_rate = float(feat_df["label"].mean()) if "label" in feat_df.columns else 0.0
+            cart_abandonment = 0.0
+            total_sessions = int(len(feat_df))
+            purchased_sessions = int(feat_df["label"].sum()) if "label" in feat_df.columns else 0
+            cart_sessions = 0
+            abandoned_cart_sessions = 0
+
+        ts = pd.to_datetime(raw_df["event_time"], utc=True, errors="coerce") if "event_time" in raw_df.columns else None
+        if ts is not None:
+            daily = (
+                raw_df.assign(_ts=ts)
+                .dropna(subset=["_ts"])
+                .assign(day=lambda d: d["_ts"].dt.strftime("%Y-%m-%d"))
+                .groupby(["day", "event_type"])
+                .size()
+                .unstack(fill_value=0)
+                .sort_index()
+            )
+            if len(daily) > 31:
+                daily = daily.tail(31)
+            day_labels = daily.index.tolist()
+            day_views = daily.get("view", pd.Series([0] * len(day_labels), index=day_labels)).astype(int).tolist()
+            day_carts = daily.get("cart", pd.Series([0] * len(day_labels), index=day_labels)).astype(int).tolist()
+            day_purchases = daily.get("purchase", pd.Series([0] * len(day_labels), index=day_labels)).astype(int).tolist()
+        else:
+            day_labels, day_views, day_carts, day_purchases = [], [], [], []
+
+        if "category_code" in raw_df.columns:
+            top_categories = raw_df["category_code"].fillna("unknown").astype(str).value_counts(normalize=True).head(6)
+            cat_labels = [c.split(".")[-1] for c in top_categories.index.tolist()]
+            cat_values = [round(float(v * 100), 2) for v in top_categories.tolist()]
+        else:
+            cat_labels, cat_values = [], []
+
+        hourly_labels = [f"{h}h" for h in range(24)]
+        if "event_time" in raw_df.columns:
+            hour_series = pd.to_datetime(raw_df["event_time"], utc=True, errors="coerce").dt.hour
+            hour_counts = hour_series.value_counts().sort_index()
+            hourly_values = [int(hour_counts.get(h, 0)) for h in range(24)]
+        else:
+            hourly_values = [0] * 24
+
+        if {"brand", "price", "event_type"}.issubset(raw_df.columns):
+            purchase_df = raw_df[raw_df["event_type"] == "purchase"].copy()
+            purchase_df["brand"] = purchase_df["brand"].fillna("unknown").astype(str)
+            purchase_df["price"] = pd.to_numeric(purchase_df["price"], errors="coerce").fillna(0.0)
+            brand_rev = purchase_df.groupby("brand")["price"].sum().sort_values(ascending=False).head(10)
+            total_rev = float(brand_rev.sum())
+            brand_labels = brand_rev.index.tolist()
+            if total_rev > 0:
+                brand_values = [round(float(v / total_rev * 100), 2) for v in brand_rev.tolist()]
+            else:
+                brand_values = [0.0] * len(brand_labels)
+        else:
+            brand_labels, brand_values = [], []
+
+        price_bins = [-1, 10, 25, 50, 100, 250, 500, float("inf")]
+        price_labels = ["<$10", "$10-25", "$25-50", "$50-100", "$100-250", "$250-500", ">$500"]
+        if "price" in raw_df.columns:
+            prices = pd.to_numeric(raw_df["price"], errors="coerce").dropna()
+            if len(prices):
+                price_bucket = pd.cut(prices, bins=price_bins, labels=price_labels)
+                price_counts = price_bucket.value_counts().reindex(price_labels, fill_value=0)
+                price_values = [round(float((count / len(prices)) * 100), 2) for count in price_counts.tolist()]
+            else:
+                price_values = [0.0] * len(price_labels)
+        else:
+            price_values = [0.0] * len(price_labels)
+
+        session_labels = ["<1", "1-3", "3-5", "5-10", "10-20", "20-30", ">30"]
+        if {"user_id", "user_session", "event_time"}.issubset(raw_df.columns):
+            ts = pd.to_datetime(raw_df["event_time"], utc=True, errors="coerce")
+            sess_df = raw_df.assign(_ts=ts).dropna(subset=["_ts"])
+            sess_duration = sess_df.groupby(["user_id", "user_session"])["_ts"].agg(lambda x: (x.max() - x.min()).total_seconds() / 60)
+            if len(sess_duration):
+                dur_bins = [-1, 1, 3, 5, 10, 20, 30, float("inf")]
+                dur_bucket = pd.cut(sess_duration, bins=dur_bins, labels=session_labels)
+                dur_counts = dur_bucket.value_counts().reindex(session_labels, fill_value=0)
+                session_values = [round(float((count / len(sess_duration)) * 100), 2) for count in dur_counts.tolist()]
+            else:
+                session_values = [0.0] * len(session_labels)
+        else:
+            session_values = [0.0] * len(session_labels)
+    else:
+        total_events = int((feat_df.get("view_count", 0) + feat_df.get("cart_count", 0) + feat_df.get("purchase_count", 0)).sum())
+        unique_users = int(feat_df.get("user_id", pd.Series(dtype="object")).nunique()) if "user_id" in feat_df.columns else 0
+        view_count = int(feat_df.get("view_count", pd.Series(dtype="float64")).sum())
+        cart_count = int(feat_df.get("cart_count", pd.Series(dtype="float64")).sum())
+        purchase_count = int(feat_df.get("purchase_count", pd.Series(dtype="float64")).sum())
+        purchase_rate = float(feat_df["label"].mean()) if "label" in feat_df.columns else 0.0
+        with_cart = feat_df.get("cart_count", pd.Series(dtype="float64")) > 0
+        no_purchase = feat_df.get("purchase_count", pd.Series(dtype="float64")) == 0
+        denom = int(with_cart.sum())
+        cart_abandonment = float((with_cart & no_purchase).sum() / denom) if denom else 0.0
+        day_labels, day_views, day_carts, day_purchases = [], [], [], []
+        cat_labels, cat_values = [], []
+        hourly_labels = [f"{h}h" for h in range(24)]
+        hourly_values = [0] * 24
+        brand_labels, brand_values = [], []
+        price_labels = ["<$10", "$10-25", "$25-50", "$50-100", "$100-250", "$250-500", ">$500"]
+        price_values = [0.0] * len(price_labels)
+        session_labels = ["<1", "1-3", "3-5", "5-10", "10-20", "20-30", ">30"]
+        session_values = [0.0] * len(session_labels)
+        total_sessions = int(len(feat_df))
+        purchased_sessions = int(feat_df["label"].sum()) if "label" in feat_df.columns else 0
+        cart_sessions = int((feat_df.get("cart_count", pd.Series(dtype="float64")) > 0).sum())
+        abandoned_cart_sessions = int(((feat_df.get("cart_count", pd.Series(dtype="float64")) > 0) & (feat_df.get("purchase_count", pd.Series(dtype="float64")) == 0)).sum())
+
+    return {
+        "source_data_paths": data_paths,
+        "overview": {
+            "total_events": total_events,
+            "unique_users": unique_users,
+            "purchase_rate": round(float(purchase_rate), 6),
+            "cart_abandonment": round(float(cart_abandonment), 6),
+        },
+        "session_stats": {
+            "total_sessions": int(total_sessions),
+            "purchased_sessions": int(purchased_sessions),
+            "cart_sessions": int(cart_sessions),
+            "abandoned_cart_sessions": int(abandoned_cart_sessions),
+        },
+        "funnel": {
+            "view": int(view_count),
+            "cart": int(cart_count),
+            "purchase": int(purchase_count),
+        },
+        "daily_event_volume": {
+            "labels": day_labels,
+            "view": day_views,
+            "cart": day_carts,
+            "purchase": day_purchases,
+        },
+        "top_categories": {
+            "labels": cat_labels,
+            "values": cat_values,
+        },
+        "hourly_activity": {
+            "labels": hourly_labels,
+            "values": hourly_values,
+        },
+        "top_brands": {
+            "labels": brand_labels,
+            "values": brand_values,
+        },
+        "price_distribution": {
+            "labels": price_labels,
+            "values": price_values,
+        },
+        "session_duration_distribution": {
+            "labels": session_labels,
+            "values": session_values,
+        },
+    }
+
+
 # ──────────────────────────────────────────────
 #  MAIN
 # ──────────────────────────────────────────────
@@ -318,6 +496,7 @@ def main(data_paths: list[str]):
         df = engineer_features(raw)
     else:
         print("[data] No valid CSV paths supplied – using synthetic data for demo.")
+        raw = None
         df = generate_synthetic_data(n=100_000)
 
     X = df[FEATURE_COLS].astype(float).fillna(0).values
@@ -369,6 +548,10 @@ def main(data_paths: list[str]):
 
     with open(os.path.join(REPORTS_DIR, "classification_report_rf.txt"), "w") as f:
         f.write(rf_report)
+
+    dashboard_report = build_dashboard_report(raw, df, valid_paths)
+    with open(os.path.join(REPORTS_DIR, "dashboard_report.json"), "w") as f:
+        json.dump(dashboard_report, f, indent=2)
 
     print("\n✓ All models saved to ./models/")
     print("✓ Reports saved to ./reports/")

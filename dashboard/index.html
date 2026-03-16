@@ -224,7 +224,7 @@ body{font-family:'DM Sans',sans-serif;background:#F8F7F4;color:#1a1a1a;min-heigh
     <div class="header">
       <div>
         <div class="header-title" id="page-title">Overview Dashboard</div>
-        <div class="header-sub" id="page-sub">Oct 2019 · 42.5M events · 3 models trained</div>
+        <div class="header-sub" id="page-sub">Loading backend metrics...</div>
       </div>
       <div class="header-actions">
         <button class="btn" onclick="handleRefresh()">↻ Refresh</button>
@@ -237,23 +237,23 @@ body{font-family:'DM Sans',sans-serif;background:#F8F7F4;color:#1a1a1a;min-heigh
       <!-- ═══ DASHBOARD ═══ -->
       <div class="page active" id="page-dashboard">
         <div class="metrics" id="dash-metrics">
-          <div class="metric-card"><div class="metric-label">Total Events</div><div class="metric-value" id="m-events">42.5M</div><div class="metric-delta up" id="m-events-d">↑ 18.3% vs prev month</div></div>
-          <div class="metric-card"><div class="metric-label">Unique Users</div><div class="metric-value" id="m-users">1.07M</div><div class="metric-delta up" id="m-users-d">↑ 12.1% vs prev month</div></div>
-          <div class="metric-card"><div class="metric-label">Purchase Rate</div><div class="metric-value" id="m-prate">3.84%</div><div class="metric-delta down" id="m-prate-d">↓ 0.4% vs prev month</div></div>
-          <div class="metric-card"><div class="metric-label">Cart Abandonment</div><div class="metric-value" id="m-cart">68.2%</div><div class="metric-delta down" id="m-cart-d">↓ 2.1% vs prev month</div></div>
+          <div class="metric-card"><div class="metric-label">Total Events</div><div class="metric-value" id="m-events">--</div><div class="metric-delta neutral" id="m-events-d">Loading from backend...</div></div>
+          <div class="metric-card"><div class="metric-label">Unique Users</div><div class="metric-value" id="m-users">--</div><div class="metric-delta neutral" id="m-users-d">Loading from backend...</div></div>
+          <div class="metric-card"><div class="metric-label">Purchase Rate</div><div class="metric-value" id="m-prate">--</div><div class="metric-delta neutral" id="m-prate-d">Loading from backend...</div></div>
+          <div class="metric-card"><div class="metric-label">Cart Abandonment</div><div class="metric-value" id="m-cart">--</div><div class="metric-delta neutral" id="m-cart-d">Loading from backend...</div></div>
         </div>
         <div class="grid-12">
           <div class="card">
-            <div class="card-header"><div><div class="card-title">Daily Event Volume</div><div class="card-sub">Views, Cart Adds, Purchases · Oct 2019</div></div><span class="card-badge blue">Live</span></div>
+            <div class="card-header"><div><div class="card-title">Daily Event Volume</div><div class="card-sub" id="daily-volume-sub">Loading from backend...</div></div><span class="card-badge blue">Live</span></div>
             <div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#3B82F6"></div>Views</div><div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div>Cart</div><div class="legend-item"><div class="legend-dot" style="background:#10B981"></div>Purchase</div></div>
             <div class="chart-wrap" style="height:210px"><canvas id="eventTrendChart"></canvas></div>
           </div>
           <div class="card">
             <div class="card-header"><div><div class="card-title">Conversion Funnel</div><div class="card-sub">View → Purchase flow</div></div></div>
             <div class="funnel">
-              <div class="funnel-row"><div class="funnel-label">View</div><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:100%;background:#3B82F6"><span class="funnel-bar-val">35.7M</span></div></div><div class="funnel-rate">100%</div></div>
-              <div class="funnel-row"><div class="funnel-label">Cart</div><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:64%;background:#F59E0B"><span class="funnel-bar-val">5.2M</span></div></div><div class="funnel-rate">14.6%</div></div>
-              <div class="funnel-row"><div class="funnel-label">Purchase</div><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:28%;background:#10B981"><span class="funnel-bar-val">1.65M</span></div></div><div class="funnel-rate">3.84%</div></div>
+              <div class="funnel-row"><div class="funnel-label">View</div><div class="funnel-bar-wrap"><div class="funnel-bar" id="funnel-view-bar" style="width:100%;background:#3B82F6"><span class="funnel-bar-val" id="funnel-view-val">--</span></div></div><div class="funnel-rate" id="funnel-view-rate">--</div></div>
+              <div class="funnel-row"><div class="funnel-label">Cart</div><div class="funnel-bar-wrap"><div class="funnel-bar" id="funnel-cart-bar" style="width:0%;background:#F59E0B"><span class="funnel-bar-val" id="funnel-cart-val">--</span></div></div><div class="funnel-rate" id="funnel-cart-rate">--</div></div>
+              <div class="funnel-row"><div class="funnel-label">Purchase</div><div class="funnel-bar-wrap"><div class="funnel-bar" id="funnel-purchase-bar" style="width:0%;background:#10B981"><span class="funnel-bar-val" id="funnel-purchase-val">--</span></div></div><div class="funnel-rate" id="funnel-purchase-rate">--</div></div>
             </div>
             <div style="margin-top:20px"><div class="section-title">Top Categories</div><div class="chart-wrap" style="height:120px"><canvas id="categoryChart"></canvas></div></div>
           </div>
@@ -271,10 +271,10 @@ body{font-family:'DM Sans',sans-serif;background:#F8F7F4;color:#1a1a1a;min-heigh
       <!-- ═══ MODELS ═══ -->
       <div class="page" id="page-models">
         <div class="metrics">
-          <div class="metric-card"><div class="metric-label">Best Accuracy</div><div class="metric-value">92.4%</div><div class="metric-delta up">Random Forest</div></div>
-          <div class="metric-card"><div class="metric-label">Best AUC-ROC</div><div class="metric-value">0.958</div><div class="metric-delta up">Random Forest</div></div>
-          <div class="metric-card"><div class="metric-label">Training Samples</div><div class="metric-value">850K</div><div class="metric-delta neutral">80/20 split</div></div>
-          <div class="metric-card"><div class="metric-label">Features Used</div><div class="metric-value">12</div><div class="metric-delta neutral">Behavioral features</div></div>
+          <div class="metric-card"><div class="metric-label">Best Accuracy</div><div class="metric-value" id="models-best-accuracy">92.4%</div><div class="metric-delta up" id="models-best-model">Random Forest</div></div>
+          <div class="metric-card"><div class="metric-label">Best AUC-ROC</div><div class="metric-value" id="models-best-auc">0.958</div><div class="metric-delta up" id="models-best-auc-model">Random Forest</div></div>
+          <div class="metric-card"><div class="metric-label">Test Samples</div><div class="metric-value" id="models-test-samples">850K</div><div class="metric-delta neutral" id="models-split-label">80/20 split</div></div>
+          <div class="metric-card"><div class="metric-label">Features Used</div><div class="metric-value" id="models-feature-count">12</div><div class="metric-delta neutral">Behavioral features</div></div>
         </div>
         <div class="grid-2">
           <div class="card">
@@ -282,33 +282,33 @@ body{font-family:'DM Sans',sans-serif;background:#F8F7F4;color:#1a1a1a;min-heigh
             <div class="model-list">
               <div class="model-item">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-                  <div><div class="model-name">Random Forest</div><div style="font-size:11px;color:#888">100 estimators · max_depth=10</div></div>
-                  <div class="model-score" style="color:#10B981">92.4%</div>
+                  <div><div class="model-name">Random Forest</div><div style="font-size:11px;color:#888" id="rf-meta">100 estimators · max_depth=10</div></div>
+                  <div class="model-score" style="color:#10B981" id="rf-score">92.4%</div>
                 </div>
-                <div class="score-bar-bg"><div class="score-bar" style="width:92.4%;background:#10B981"></div></div>
-                <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;color:#888"><span>Precision: <b style="color:#1a1a1a">0.91</b></span><span>Recall: <b style="color:#1a1a1a">0.89</b></span><span>F1: <b style="color:#1a1a1a">0.90</b></span><span>AUC: <b style="color:#1a1a1a">0.958</b></span></div>
+                <div class="score-bar-bg"><div class="score-bar" id="rf-score-bar" style="width:92.4%;background:#10B981"></div></div>
+                <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;color:#888"><span>Precision: <b style="color:#1a1a1a" id="rf-precision">0.91</b></span><span>Recall: <b style="color:#1a1a1a" id="rf-recall">0.89</b></span><span>F1: <b style="color:#1a1a1a" id="rf-f1">0.90</b></span><span>AUC: <b style="color:#1a1a1a" id="rf-auc">0.958</b></span></div>
               </div>
               <div class="model-item">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
                   <div><div class="model-name">Logistic Regression</div><div style="font-size:11px;color:#888">C=1.0 · solver=lbfgs</div></div>
-                  <div class="model-score" style="color:#3B82F6">81.7%</div>
+                  <div class="model-score" style="color:#3B82F6" id="lr-score">81.7%</div>
                 </div>
-                <div class="score-bar-bg"><div class="score-bar" style="width:81.7%;background:#3B82F6"></div></div>
-                <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;color:#888"><span>Precision: <b style="color:#1a1a1a">0.80</b></span><span>Recall: <b style="color:#1a1a1a">0.79</b></span><span>F1: <b style="color:#1a1a1a">0.79</b></span><span>AUC: <b style="color:#1a1a1a">0.871</b></span></div>
+                <div class="score-bar-bg"><div class="score-bar" id="lr-score-bar" style="width:81.7%;background:#3B82F6"></div></div>
+                <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;color:#888"><span>Precision: <b style="color:#1a1a1a" id="lr-precision">0.80</b></span><span>Recall: <b style="color:#1a1a1a" id="lr-recall">0.79</b></span><span>F1: <b style="color:#1a1a1a" id="lr-f1">0.79</b></span><span>AUC: <b style="color:#1a1a1a" id="lr-auc">0.871</b></span></div>
               </div>
               <div class="model-item">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
                   <div><div class="model-name">K-Means Cluster Predict</div><div style="font-size:11px;color:#888">k=4 clusters · Euclidean</div></div>
-                  <div class="model-score" style="color:#F59E0B">74.3%</div>
+                  <div class="model-score" style="color:#F59E0B" id="km-score">74.3%</div>
                 </div>
-                <div class="score-bar-bg"><div class="score-bar" style="width:74.3%;background:#F59E0B"></div></div>
-                <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;color:#888"><span>Silhouette: <b style="color:#1a1a1a">0.61</b></span><span>Inertia: <b style="color:#1a1a1a">48.2K</b></span></div>
+                <div class="score-bar-bg"><div class="score-bar" id="km-score-bar" style="width:74.3%;background:#F59E0B"></div></div>
+                <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;color:#888"><span>Silhouette: <b style="color:#1a1a1a" id="km-silhouette">0.61</b></span><span>Inertia: <b style="color:#1a1a1a" id="km-inertia">48.2K</b></span></div>
               </div>
             </div>
           </div>
           <div class="card">
             <div class="card-header"><div><div class="card-title">ROC Curves</div><div class="card-sub">All models · Purchase prediction</div></div></div>
-            <div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#10B981"></div>RF (AUC=0.958)</div><div class="legend-item"><div class="legend-dot" style="background:#3B82F6"></div>LR (AUC=0.871)</div></div>
+            <div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#10B981"></div><span id="roc-rf-label">RF (AUC=0.958)</span></div><div class="legend-item"><div class="legend-dot" style="background:#3B82F6"></div><span id="roc-lr-label">LR (AUC=0.871)</span></div></div>
             <div class="chart-wrap" style="height:220px"><canvas id="rocChart"></canvas></div>
           </div>
         </div>
@@ -327,13 +327,13 @@ body{font-family:'DM Sans',sans-serif;background:#F8F7F4;color:#1a1a1a;min-heigh
             </div>
           </div>
           <div class="card">
-            <div class="card-header"><div><div class="card-title">Confusion Matrix</div><div class="card-sub">Random Forest · Test Set (212K samples)</div></div></div>
+            <div class="card-header"><div><div class="card-title">Confusion Matrix</div><div class="card-sub" id="rf-cm-sub">Random Forest · Test Set (212K samples)</div></div></div>
             <div style="margin-bottom:8px;display:flex;justify-content:space-around"><span style="font-size:10px;color:#888;font-weight:600">PREDICTED NO</span><span style="font-size:10px;color:#888;font-weight:600">PREDICTED YES</span></div>
             <div class="conf-matrix">
-              <div class="conf-cell" style="background:#DCFCE7"><div class="conf-num" style="color:#166534">189,440</div><div class="conf-label">True Negative</div></div>
-              <div class="conf-cell" style="background:#FEE2E2"><div class="conf-num" style="color:#991b1b">8,120</div><div class="conf-label">False Positive</div></div>
-              <div class="conf-cell" style="background:#FEF9C3"><div class="conf-num" style="color:#92400e">8,390</div><div class="conf-label">False Negative</div></div>
-              <div class="conf-cell" style="background:#DBEAFE"><div class="conf-num" style="color:#1e40af">6,050</div><div class="conf-label">True Positive</div></div>
+              <div class="conf-cell" style="background:#DCFCE7"><div class="conf-num" style="color:#166534" id="rf-tn">189,440</div><div class="conf-label">True Negative</div></div>
+              <div class="conf-cell" style="background:#FEE2E2"><div class="conf-num" style="color:#991b1b" id="rf-fp">8,120</div><div class="conf-label">False Positive</div></div>
+              <div class="conf-cell" style="background:#FEF9C3"><div class="conf-num" style="color:#92400e" id="rf-fn">8,390</div><div class="conf-label">False Negative</div></div>
+              <div class="conf-cell" style="background:#DBEAFE"><div class="conf-num" style="color:#1e40af" id="rf-tp">6,050</div><div class="conf-label">True Positive</div></div>
             </div>
             <div style="margin-top:10px;display:flex;justify-content:space-around"><span style="font-size:10px;color:#888">ACTUAL NO</span><span style="font-size:10px;color:#888">ACTUAL YES</span></div>
           </div>
@@ -343,10 +343,10 @@ body{font-family:'DM Sans',sans-serif;background:#F8F7F4;color:#1a1a1a;min-heigh
       <!-- ═══ CLUSTERS ═══ -->
       <div class="page" id="page-clusters">
         <div class="metrics">
-          <div class="metric-card"><div class="metric-label">Optimal K</div><div class="metric-value">4</div><div class="metric-delta neutral">Elbow method</div></div>
-          <div class="metric-card"><div class="metric-label">Silhouette Score</div><div class="metric-value">0.61</div><div class="metric-delta up">Good separation</div></div>
-          <div class="metric-card"><div class="metric-label">Inertia</div><div class="metric-value">48.2K</div><div class="metric-delta neutral">Within-cluster sum</div></div>
-          <div class="metric-card"><div class="metric-label">Cluster Samples</div><div class="metric-value">1.07M</div><div class="metric-delta neutral">All unique users</div></div>
+          <div class="metric-card"><div class="metric-label">Optimal K</div><div class="metric-value" id="cluster-k">4</div><div class="metric-delta neutral">Elbow method</div></div>
+          <div class="metric-card"><div class="metric-label">Silhouette Score</div><div class="metric-value" id="cluster-silhouette">0.61</div><div class="metric-delta up">Good separation</div></div>
+          <div class="metric-card"><div class="metric-label">Inertia</div><div class="metric-value" id="cluster-inertia">48.2K</div><div class="metric-delta neutral">Within-cluster sum</div></div>
+          <div class="metric-card"><div class="metric-label">Cluster Samples</div><div class="metric-value" id="cluster-samples">1.07M</div><div class="metric-delta neutral">All unique users</div></div>
         </div>
         <div class="grid-12">
           <div class="card">
@@ -421,17 +421,17 @@ body{font-family:'DM Sans',sans-serif;background:#F8F7F4;color:#1a1a1a;min-heigh
       <!-- ═══ PREDICTIONS ═══ -->
       <div class="page" id="page-predictions">
         <div class="metrics">
-          <div class="metric-card"><div class="metric-label">Users Scored</div><div class="metric-value" id="pred-m1">1.07M</div><div class="metric-delta neutral">All Oct users</div></div>
-          <div class="metric-card"><div class="metric-label">High Propensity</div><div class="metric-value" id="pred-m2">284K</div><div class="metric-delta up">p &gt; 0.7</div></div>
-          <div class="metric-card"><div class="metric-label">Mid Propensity</div><div class="metric-value" id="pred-m3">412K</div><div class="metric-delta neutral">0.3 ≤ p ≤ 0.7</div></div>
-          <div class="metric-card"><div class="metric-label">Low Propensity</div><div class="metric-value" id="pred-m4">374K</div><div class="metric-delta down">p &lt; 0.3</div></div>
+          <div class="metric-card"><div class="metric-label">Users Scored</div><div class="metric-value" id="pred-m1">--</div><div class="metric-delta neutral" id="pred-m1-d">Loading from backend...</div></div>
+          <div class="metric-card"><div class="metric-label">High Propensity</div><div class="metric-value" id="pred-m2">--</div><div class="metric-delta up" id="pred-m2-d">p &gt; 0.7</div></div>
+          <div class="metric-card"><div class="metric-label">Mid Propensity</div><div class="metric-value" id="pred-m3">--</div><div class="metric-delta neutral" id="pred-m3-d">0.3 ≤ p ≤ 0.7</div></div>
+          <div class="metric-card"><div class="metric-label">Low Propensity</div><div class="metric-value" id="pred-m4">--</div><div class="metric-delta down" id="pred-m4-d">p &lt; 0.3</div></div>
         </div>
         <div class="grid-2">
-          <div class="card"><div class="card-header"><div><div class="card-title">Score Distribution</div><div class="card-sub">All 1.07M users · RF Model</div></div></div><div class="chart-wrap" style="height:210px"><canvas id="predDistChart"></canvas></div></div>
+          <div class="card"><div class="card-header"><div><div class="card-title">Score Distribution</div><div class="card-sub" id="pred-dist-sub">Loading from backend...</div></div></div><div class="chart-wrap" style="height:210px"><canvas id="predDistChart"></canvas></div></div>
           <div class="card"><div class="card-header"><div><div class="card-title">Precision-Recall Curve</div><div class="card-sub">RF vs Logistic Regression</div></div></div><div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#10B981"></div>Random Forest</div><div class="legend-item"><div class="legend-dot" style="background:#3B82F6"></div>Logistic Regression</div></div><div class="chart-wrap" style="height:180px"><canvas id="prChart"></canvas></div></div>
         </div>
         <div class="card">
-          <div class="card-header"><div><div class="card-title">Top High-Propensity Users</div><div class="card-sub">RF score &gt; 0.85 · Refreshes with new live scores</div></div><span class="card-badge green" id="pred-live-badge">Live</span></div>
+          <div class="card-header"><div><div class="card-title">Top High-Propensity Users</div><div class="card-sub" id="pred-top-sub">Loading from backend...</div></div><span class="card-badge green" id="pred-live-badge">Live</span></div>
           <table class="data-table"><thead><tr><th>User ID</th><th>Views</th><th>Cart Adds</th><th>Purchases</th><th>Avg Price</th><th>Cluster</th><th>RF Score</th><th>LR Score</th><th>Propensity</th></tr></thead><tbody id="pred-table-body"></tbody></table>
         </div>
       </div>
@@ -587,9 +587,74 @@ const CLUSTER_COLORS=['#3B82F6','#10B981','#F59E0B','#EF4444'];
 const CLUSTER_NAMES=['Browsers','Active Buyers','Researchers','High-Value'];
 const GR={color:'rgba(0,0,0,0.04)',lineWidth:0.5};
 const FT={family:"'DM Sans',sans-serif",size:11};
+const MODEL_LABELS={random_forest:'Random Forest',logistic_regression:'Logistic Regression'};
+let latestDashboardSummary=null;
+let latestDashboardData=null;
+let latestPredictionsData=null;
 
 // seeded rand
 function rand(s){let x=Math.sin(s)*10000;return x-Math.floor(x);}
+
+function asPct(value,digits=1){
+  return `${((Number(value)||0)*100).toFixed(digits)}%`;
+}
+
+function asNum(value,digits=4){
+  return (Number(value)||0).toFixed(digits);
+}
+
+function compactInt(value){
+  const num=Number(value)||0;
+  return new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1}).format(num);
+}
+
+function intWithCommas(value){
+  return (Number(value)||0).toLocaleString('en-US');
+}
+
+function compactFloat(value){
+  const num=Number(value)||0;
+  if(num>=1_000_000){
+    return `${(num/1_000_000).toFixed(2)}M`;
+  }
+  if(num>=1_000){
+    return `${(num/1_000).toFixed(1)}K`;
+  }
+  return num.toFixed(2);
+}
+
+function shortNumber(value){
+  const num=Number(value)||0;
+  if(num>=1_000_000){
+    return `${(num/1_000_000).toFixed(2)}M`;
+  }
+  if(num>=1_000){
+    return `${(num/1_000).toFixed(1)}K`;
+  }
+  return num.toString();
+}
+async function fetchApi(path){
+  const cacheBust=`_ts=${Date.now()}`;
+  const withQuery=path.includes('?')?`${path}&${cacheBust}`:`${path}?${cacheBust}`;
+  const targets=[
+    withQuery,
+    `http://127.0.0.1:5000${withQuery}`,
+    `http://localhost:5000${withQuery}`,
+  ];
+  let lastError=null;
+  for(const url of targets){
+    try{
+      const res=await fetch(url,{cache:'no-store'});
+      if(!res.ok){
+        throw new Error(`HTTP ${res.status}`);
+      }
+      return await res.json();
+    }catch(err){
+      lastError=err;
+    }
+  }
+  throw lastError||new Error('API request failed');
+}
 
 // ═══════════════════════════════════════════
 //  TOAST
@@ -604,7 +669,7 @@ function toast(msg){
 //  PAGE NAV
 // ═══════════════════════════════════════════
 const PAGE_META={
-  dashboard:['Overview Dashboard','Oct 2019 · 42.5M events · 3 models trained'],
+  dashboard:['Overview Dashboard','Loading backend metrics...'],
   models:['ML Model Analysis','Logistic Regression · K-Means · Random Forest'],
   clusters:['K-Means Clustering','K=4 · 1.07M users segmented'],
   journey:['Customer Journey Mapping','Single user behavioral analysis'],
@@ -628,19 +693,11 @@ function showPage(name,btn){
 //  and updates dashboard KPI numbers slightly
 // ═══════════════════════════════════════════
 function handleRefresh(){
-  renderPredTable();
+  loadPredictionsData(false);
 
-  // Slightly vary dashboard KPIs to show live feel
-  const jitter=()=>(Math.random()*0.4-0.2).toFixed(1);
-  const base={events:42.5,users:1.07,prate:3.84,cart:68.2};
-  const ev=(base.events+(Math.random()*.4-.2)).toFixed(1)+'M';
-  const us=(base.users+(Math.random()*.02-.01)).toFixed(2)+'M';
-  const pr=(base.prate+(Math.random()*.2-.1)).toFixed(2)+'%';
-  const ca=(base.cart+(Math.random()*.4-.2)).toFixed(1)+'%';
-  document.getElementById('m-events').textContent=ev;
-  document.getElementById('m-users').textContent=us;
-  document.getElementById('m-prate').textContent=pr;
-  document.getElementById('m-cart').textContent=ca;
+  // Pull latest training stats from backend artifacts.
+  loadDashboardSummary(false);
+  loadDashboardData(false);
 
   // Flash badge on predictions page
   const badge=document.getElementById('pred-live-badge');
@@ -659,9 +716,9 @@ function handleExport(){
 
   if(currentPage==='predictions'||currentPage==='dashboard'){
     filename='ecomml_predictions.csv';
-    const users=generatePredUsers();
+    const users=(latestPredictionsData&&latestPredictionsData.top_users)?latestPredictionsData.top_users:[];
     csv='user_id,views,cart_adds,purchases,avg_price,cluster,cluster_name,rf_score,lr_score,propensity\n';
-    csv+=users.map(u=>`${u.id},${u.views},${u.carts},${u.purchases},${u.avgPrice.replace('$','')},${u.cluster},${CLUSTER_NAMES[u.cluster]},${u.rfS},${u.lrS},${u.prop}`).join('\n');
+    csv+=users.map(u=>`${u.id},${u.views},${u.carts},${u.purchases},${u.avgPrice.replace('$','')},${u.cluster},${u.cluster_name||CLUSTER_NAMES[u.cluster]},${u.rfS},${u.lrS},${u.prop}`).join('\n');
     toast('✓ Exported '+users.length+' predictions as CSV');
   }
   else if(currentPage==='existing'){
@@ -889,6 +946,228 @@ function animateBars(){
   },80));
 }
 
+function applyDashboardData(data){
+  if(!data){
+    return;
+  }
+  latestDashboardData=data;
+
+  const overview=data.overview||{};
+  const sessionStats=data.session_stats||{};
+  const funnel=data.funnel||{};
+  const trend=data.daily_event_volume||{};
+  const categories=data.top_categories||{};
+  const hourly=data.hourly_activity||{};
+  const brands=data.top_brands||{};
+  const priceDist=data.price_distribution||{};
+  const sessionDist=data.session_duration_distribution||{};
+
+  const totalEvents=Number(overview.total_events)||0;
+  const uniqueUsers=Number(overview.unique_users)||0;
+  const purchaseRate=Number(overview.purchase_rate)||0;
+  const cartAbandon=Number(overview.cart_abandonment)||0;
+  const totalSessions=Number(sessionStats.total_sessions)||0;
+  const purchasedSessions=Number(sessionStats.purchased_sessions)||0;
+  const cartSessions=Number(sessionStats.cart_sessions)||0;
+  const abandonedCartSessions=Number(sessionStats.abandoned_cart_sessions)||0;
+
+  document.getElementById('m-events').textContent=shortNumber(totalEvents);
+  document.getElementById('m-users').textContent=shortNumber(uniqueUsers);
+  document.getElementById('m-prate').textContent=asPct(purchaseRate,2);
+  document.getElementById('m-cart').textContent=asPct(cartAbandon,2);
+  const sourceLabel=data.source||'training data';
+  const updatedLabel=data.last_updated?new Date(data.last_updated).toLocaleString():'latest run';
+  document.getElementById('m-events-d').textContent=`${sourceLabel} · ${updatedLabel}`;
+  document.getElementById('m-users-d').textContent=`${intWithCommas(uniqueUsers)} distinct customer IDs`;
+  document.getElementById('m-prate-d').textContent=`${intWithCommas(purchasedSessions)} of ${intWithCommas(totalSessions)} sessions purchased`;
+  document.getElementById('m-cart-d').textContent=`${intWithCommas(abandonedCartSessions)} of ${intWithCommas(cartSessions)} cart sessions abandoned`;
+  document.getElementById('m-events-d').className='metric-delta neutral';
+  document.getElementById('m-users-d').className='metric-delta neutral';
+  document.getElementById('m-prate-d').className='metric-delta neutral';
+  document.getElementById('m-cart-d').className='metric-delta neutral';
+
+  const viewCount=Number(funnel.view)||0;
+  const cartCount=Number(funnel.cart)||0;
+  const purchaseCount=Number(funnel.purchase)||0;
+  const base=Math.max(1,viewCount);
+
+  document.getElementById('funnel-view-val').textContent=shortNumber(viewCount);
+  document.getElementById('funnel-cart-val').textContent=shortNumber(cartCount);
+  document.getElementById('funnel-purchase-val').textContent=shortNumber(purchaseCount);
+  document.getElementById('funnel-view-rate').textContent='100%';
+  document.getElementById('funnel-cart-rate').textContent=asPct(cartCount/base,1);
+  document.getElementById('funnel-purchase-rate').textContent=asPct(purchaseCount/base,1);
+  document.getElementById('funnel-view-bar').style.width='100%';
+  document.getElementById('funnel-cart-bar').style.width=`${Math.max(3,(cartCount/base)*100).toFixed(1)}%`;
+  document.getElementById('funnel-purchase-bar').style.width=`${Math.max(3,(purchaseCount/base)*100).toFixed(1)}%`;
+
+  if(window.eventTrendChartInstance){
+    const labels=(trend.labels||[]).map(label=>label.slice(5));
+    window.eventTrendChartInstance.data.labels=labels;
+    window.eventTrendChartInstance.data.datasets[0].data=trend.view||[];
+    window.eventTrendChartInstance.data.datasets[1].data=trend.cart||[];
+    window.eventTrendChartInstance.data.datasets[2].data=trend.purchase||[];
+    window.eventTrendChartInstance.update();
+  }
+
+  if(window.categoryChartInstance){
+    window.categoryChartInstance.data.labels=categories.labels||[];
+    window.categoryChartInstance.data.datasets[0].data=categories.values||[];
+    window.categoryChartInstance.update();
+  }
+
+  if(window.heatmapChartInstance){
+    window.heatmapChartInstance.data.labels=hourly.labels||[];
+    const hourlyVals=hourly.values||[];
+    const maxVal=Math.max(1,...hourlyVals);
+    window.heatmapChartInstance.data.datasets[0].data=hourlyVals;
+    window.heatmapChartInstance.data.datasets[0].backgroundColor=hourlyVals.map(v=>`rgba(59,130,246,${Math.max(0.12,Number(v)/maxVal).toFixed(2)})`);
+    window.heatmapChartInstance.update();
+  }
+
+  if(window.brandChartInstance){
+    window.brandChartInstance.data.labels=brands.labels||[];
+    window.brandChartInstance.data.datasets[0].data=brands.values||[];
+    window.brandChartInstance.update();
+  }
+
+  if(window.priceChartInstance){
+    window.priceChartInstance.data.labels=priceDist.labels||[];
+    window.priceChartInstance.data.datasets[0].data=priceDist.values||[];
+    window.priceChartInstance.update();
+  }
+
+  if(window.sessionChartInstance){
+    window.sessionChartInstance.data.labels=sessionDist.labels||[];
+    window.sessionChartInstance.data.datasets[0].data=sessionDist.values||[];
+    window.sessionChartInstance.update();
+  }
+
+  const updated=data.last_updated?new Date(data.last_updated).toLocaleDateString():'latest run';
+  document.getElementById('daily-volume-sub').textContent=`Views, Cart Adds, Purchases · ${updated}`;
+}
+
+async function loadDashboardData(showToast=true){
+  try{
+    const payload=await fetchApi('/api/dashboard-data');
+    applyDashboardData(payload);
+    if(showToast){
+      toast('✓ Synced dashboard events from backend data');
+    }
+  }catch(err){
+    document.getElementById('m-events-d').textContent='Backend unavailable';
+    document.getElementById('m-users-d').textContent='Backend unavailable';
+    document.getElementById('m-prate-d').textContent='Backend unavailable';
+    document.getElementById('m-cart-d').textContent='Backend unavailable';
+    document.getElementById('daily-volume-sub').textContent='Backend unavailable';
+    if(showToast){
+      toast('⚠ Dashboard data API unavailable. Showing fallback visuals.');
+    }
+  }
+}
+
+// ═══════════════════════════════════════════
+//  BACKEND SUMMARY BINDING
+// ═══════════════════════════════════════════
+function applyDashboardSummary(summary){
+  if(!summary){
+    return;
+  }
+
+  latestDashboardSummary=summary;
+  const rf=summary.random_forest||{};
+  const lr=summary.logistic_regression||{};
+  const km=summary.kmeans||{};
+  const rfParams=summary.random_forest_hyperparams||{};
+  const bestModelName=MODEL_LABELS[summary.best_model]||'Random Forest';
+
+  document.getElementById('models-best-accuracy').textContent=asPct(summary.best_accuracy,1);
+  document.getElementById('models-best-model').textContent=bestModelName;
+
+  const rfAuc=Number(rf.auc_roc)||0;
+  const lrAuc=Number(lr.auc_roc)||0;
+  if(rfAuc>=lrAuc){
+    document.getElementById('models-best-auc').textContent=asNum(rfAuc,4);
+    document.getElementById('models-best-auc-model').textContent='Random Forest';
+  }else{
+    document.getElementById('models-best-auc').textContent=asNum(lrAuc,4);
+    document.getElementById('models-best-auc-model').textContent='Logistic Regression';
+  }
+
+  document.getElementById('models-test-samples').textContent=compactInt(summary.rf_test_samples||0);
+  document.getElementById('models-feature-count').textContent=String(summary.feature_count||0);
+
+  document.getElementById('rf-score').textContent=asPct(rf.accuracy,1);
+  document.getElementById('rf-score-bar').style.width=asPct(rf.accuracy,1);
+  if(rfParams.n_estimators){
+    const depth=(rfParams.max_depth===null||rfParams.max_depth===undefined)?'None':rfParams.max_depth;
+    document.getElementById('rf-meta').textContent=`${rfParams.n_estimators} estimators · max_depth=${depth}`;
+  }
+  document.getElementById('rf-precision').textContent=asNum(rf.precision,4);
+  document.getElementById('rf-recall').textContent=asNum(rf.recall,4);
+  document.getElementById('rf-f1').textContent=asNum(rf.f1_score,4);
+  document.getElementById('rf-auc').textContent=asNum(rf.auc_roc,4);
+
+  document.getElementById('lr-score').textContent=asPct(lr.accuracy,1);
+  document.getElementById('lr-score-bar').style.width=asPct(lr.accuracy,1);
+  document.getElementById('lr-precision').textContent=asNum(lr.precision,4);
+  document.getElementById('lr-recall').textContent=asNum(lr.recall,4);
+  document.getElementById('lr-f1').textContent=asNum(lr.f1_score,4);
+  document.getElementById('lr-auc').textContent=asNum(lr.auc_roc,4);
+
+  document.getElementById('km-score').textContent=asPct(km.silhouette_score,1);
+  document.getElementById('km-score-bar').style.width=asPct(km.silhouette_score,1);
+  document.getElementById('km-silhouette').textContent=asNum(km.silhouette_score,4);
+  document.getElementById('km-inertia').textContent=compactFloat(km.inertia);
+
+  document.getElementById('cluster-k').textContent=String(km.k||4);
+  document.getElementById('cluster-silhouette').textContent=asNum(km.silhouette_score,4);
+  document.getElementById('cluster-inertia').textContent=compactFloat(km.inertia);
+  const clusterSizes=km.cluster_sizes||{};
+  const clusterSampleCount=Object.values(clusterSizes).reduce((sum,val)=>sum+(Number(val)||0),0);
+  document.getElementById('cluster-samples').textContent=compactInt(clusterSampleCount);
+
+  const cm=rf.confusion_matrix||[[0,0],[0,0]];
+  const tn=((cm[0]||[])[0])||0;
+  const fp=((cm[0]||[])[1])||0;
+  const fn=((cm[1]||[])[0])||0;
+  const tp=((cm[1]||[])[1])||0;
+  const totalCm=tn+fp+fn+tp;
+  document.getElementById('rf-tn').textContent=intWithCommas(tn);
+  document.getElementById('rf-fp').textContent=intWithCommas(fp);
+  document.getElementById('rf-fn').textContent=intWithCommas(fn);
+  document.getElementById('rf-tp').textContent=intWithCommas(tp);
+  document.getElementById('rf-cm-sub').textContent=`Random Forest · Test Set (${compactInt(totalCm)} samples)`;
+
+  document.getElementById('roc-rf-label').textContent=`RF (AUC=${asNum(rf.auc_roc,4)})`;
+  document.getElementById('roc-lr-label').textContent=`LR (AUC=${asNum(lr.auc_roc,4)})`;
+  if(window.rocChartInstance){
+    window.rocChartInstance.data.datasets[0].data=rocPts(Number(rf.auc_roc)||0.5);
+    window.rocChartInstance.data.datasets[1].data=rocPts(Number(lr.auc_roc)||0.5);
+    window.rocChartInstance.update();
+  }
+
+  const updatedLabel=summary.last_updated?new Date(summary.last_updated).toLocaleString():'Unknown';
+  PAGE_META.dashboard[1]=`Backend-linked metrics · Last trained ${updatedLabel}`;
+  if(currentPage==='dashboard'){
+    document.getElementById('page-sub').textContent=PAGE_META.dashboard[1];
+  }
+}
+
+async function loadDashboardSummary(showToast=true){
+  try{
+    const payload=await fetchApi('/api/dashboard-summary');
+    applyDashboardSummary(payload);
+    if(showToast){
+      toast('✓ Synced latest metrics from backend models');
+    }
+  }catch(err){
+    if(showToast){
+      toast('⚠ Backend summary unavailable. Showing fallback demo values.');
+    }
+  }
+}
+
 // ═══════════════════════════════════════════
 //  EXISTING CUSTOMER
 // ═══════════════════════════════════════════
@@ -1063,67 +1342,104 @@ function filterJourney(type,btn){
 loadJourney();
 
 // ═══════════════════════════════════════════
-//  PREDICTIONS TABLE
+//  PREDICTIONS TABLE (BACKEND-DRIVEN)
 // ═══════════════════════════════════════════
-function generatePredUsers(){
-  const users=[];
-  const ids=[519643332,565438564,607388789,548678342,524899002,612304451,503921887,571004322,534660102,598721405];
-  for(let i=0;i<10;i++){
-    const views=Math.floor(rand(ids[i]+i*99)*30)+8;
-    const carts=Math.floor(rand(ids[i]+i*77+1)*8)+2;
-    const purchases=Math.floor(rand(ids[i]+i*55+2)*5)+1;
-    const avgPrice=Math.floor(rand(ids[i]+i*33+3)*200+20);
-    const cluster=Math.floor(rand(ids[i]+i*11+4)*4);
-    const loyalty=Math.floor(rand(ids[i]+i*7+8)*10);
-    const sessCount=Math.floor(rand(ids[i]+i*3+9)*10)+1;
-    const rf=rfScore(views,carts,purchases,12,avgPrice,3,loyalty,sessCount);
-    const lr=lrScore(views,carts,purchases,12,avgPrice,3,loyalty,sessCount);
-    users.push({id:ids[i],views,carts,purchases,avgPrice:'$'+avgPrice,cluster,rfS:rf.toFixed(3),lrS:lr.toFixed(3),prop:rf>=0.7?'high':rf>=0.4?'med':'low'});
-  }
-  return users;
-}
-function renderPredTable(){
-  const users=generatePredUsers();
-  // update metric cards too
-  const high=users.filter(u=>parseFloat(u.rfS)>=0.7).length;
-  const mid=users.filter(u=>parseFloat(u.rfS)>=0.4&&parseFloat(u.rfS)<0.7).length;
-  const low=users.filter(u=>parseFloat(u.rfS)<0.4).length;
-  document.getElementById('pred-table-body').innerHTML=users.map(u=>`
+function renderPredTable(users){
+  const safeUsers=Array.isArray(users)?users:[];
+  document.getElementById('pred-table-body').innerHTML=safeUsers.map(u=>`
     <tr>
       <td style="font-family:'DM Mono',monospace;font-size:11px;color:#555">${u.id}</td>
       <td>${u.views}</td><td>${u.carts}</td><td>${u.purchases}</td><td>${u.avgPrice}</td>
-      <td><span style="display:inline-flex;align-items:center;gap:4px;font-size:11px"><span style="width:8px;height:8px;border-radius:50%;background:${CLUSTER_COLORS[u.cluster]}"></span>${CLUSTER_NAMES[u.cluster]}</span></td>
-      <td style="font-family:'DM Mono',monospace;font-weight:600;color:${parseFloat(u.rfS)>=0.7?'#10B981':parseFloat(u.rfS)>=0.4?'#F59E0B':'#EF4444'}">${u.rfS}</td>
+      <td><span style="display:inline-flex;align-items:center;gap:4px;font-size:11px"><span style="width:8px;height:8px;border-radius:50%;background:${CLUSTER_COLORS[u.cluster]}" ></span>${u.cluster_name||CLUSTER_NAMES[u.cluster]}</span></td>
+      <td style="font-family:'DM Mono',monospace;font-weight:600;color:${Number(u.rfS)>=0.7?'#10B981':Number(u.rfS)>=0.3?'#F59E0B':'#EF4444'}">${u.rfS}</td>
       <td style="font-family:'DM Mono',monospace;color:#3B82F6">${u.lrS}</td>
-      <td><span class="status-pill ${u.prop}">${u.prop.toUpperCase()}</span></td>
+      <td><span class="status-pill ${u.prop}">${String(u.prop||'low').toUpperCase()}</span></td>
     </tr>`).join('');
 }
-renderPredTable();
+
+function applyPredictionsData(data){
+  latestPredictionsData=data;
+  const usersScored=Number(data.users_scored)||0;
+  const high=Number(data.high_propensity)||0;
+  const mid=Number(data.mid_propensity)||0;
+  const low=Number(data.low_propensity)||0;
+
+  document.getElementById('pred-m1').textContent=shortNumber(usersScored);
+  document.getElementById('pred-m2').textContent=shortNumber(high);
+  document.getElementById('pred-m3').textContent=shortNumber(mid);
+  document.getElementById('pred-m4').textContent=shortNumber(low);
+  document.getElementById('pred-m1-d').textContent=`All ${shortNumber(usersScored)} scored users`;
+  document.getElementById('pred-dist-sub').textContent=`All ${shortNumber(usersScored)} users · RF Model`;
+  document.getElementById('pred-top-sub').textContent='Sorted by highest RF score from latest data';
+
+  const sourceLabel=data.source||'dataset';
+  const updatedLabel=data.last_updated?new Date(data.last_updated).toLocaleString():'latest run';
+  PAGE_META.predictions[1]=`Scored ${shortNumber(usersScored)} users · ${sourceLabel} · ${updatedLabel}`;
+  if(currentPage==='predictions'){
+    document.getElementById('page-sub').textContent=PAGE_META.predictions[1];
+  }
+
+  renderPredTable(data.top_users||[]);
+
+  if(window.predDistChartInstance){
+    window.predDistChartInstance.data.labels=(data.score_distribution&&data.score_distribution.labels)?data.score_distribution.labels:[];
+    window.predDistChartInstance.data.datasets[0].data=(data.score_distribution&&data.score_distribution.values)?data.score_distribution.values:[];
+    window.predDistChartInstance.update();
+  }
+
+  if(window.prChartInstance){
+    const rfCurve=(data.pr_curve&&data.pr_curve.rf)?data.pr_curve.rf:{recall:[0,1],precision:[1,0]};
+    const lrCurve=(data.pr_curve&&data.pr_curve.lr)?data.pr_curve.lr:{recall:[0,1],precision:[1,0]};
+    window.prChartInstance.data.datasets[0].data=(rfCurve.recall||[]).map((r,i)=>({x:r,y:(rfCurve.precision||[])[i]||0}));
+    window.prChartInstance.data.datasets[1].data=(lrCurve.recall||[]).map((r,i)=>({x:r,y:(lrCurve.precision||[])[i]||0}));
+    window.prChartInstance.update();
+  }
+}
+
+async function loadPredictionsData(showToast=true){
+  try{
+    const payload=await fetchApi('/api/predictions-data');
+    applyPredictionsData(payload);
+    if(showToast){
+      toast('✓ Synced predictions from backend models');
+    }
+  }catch(err){
+    document.getElementById('pred-m1-d').textContent='Backend unavailable';
+    document.getElementById('pred-dist-sub').textContent='Backend unavailable';
+    document.getElementById('pred-top-sub').textContent='Backend unavailable';
+    if(showToast){
+      toast('⚠ Predictions API unavailable.');
+    }
+  }
+}
 
 // ═══════════════════════════════════════════
 //  CHARTS
 // ═══════════════════════════════════════════
 const days=Array.from({length:31},(_,i)=>i+1);
-new Chart(document.getElementById('eventTrendChart'),{type:'line',data:{labels:days.map(d=>`Oct ${d}`),datasets:[{label:'Views',data:days.map(()=>Math.floor(900000+Math.sin(Math.random()*.4)*200000+Math.random()*80000)),borderColor:'#3B82F6',backgroundColor:'rgba(59,130,246,.07)',fill:true,tension:.4,pointRadius:0,borderWidth:2},{label:'Cart',data:days.map(()=>Math.floor(140000+Math.sin(Math.random()*.5)*30000+Math.random()*15000)),borderColor:'#F59E0B',backgroundColor:'rgba(245,158,11,.07)',fill:true,tension:.4,pointRadius:0,borderWidth:2},{label:'Purchase',data:days.map(()=>Math.floor(45000+Math.sin(Math.random()*.6)*10000+Math.random()*7000)),borderColor:'#10B981',backgroundColor:'rgba(16,185,129,.07)',fill:true,tension:.4,pointRadius:0,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:FT,maxTicksLimit:8,color:'#999'},grid:{display:false}},y:{ticks:{font:FT,color:'#999',callback:v=>v>999999?Math.round(v/1000000)+'M':Math.round(v/1000)+'K'},grid:GR}}}});
-new Chart(document.getElementById('categoryChart'),{type:'bar',data:{labels:['Electronics','Clothing','Furniture','Sports','Beauty','Computers'],datasets:[{data:[38,22,14,11,9,6],backgroundColor:['#3B82F6','#10B981','#F59E0B','#EF4444','#8B5CF6','#06B6D4'],borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{...FT,size:10},color:'#999'},grid:{display:false}},y:{ticks:{font:FT,color:'#999',callback:v=>v+'%'},grid:GR,max:50}}}});
-const actH=[2,1,1,1,2,4,8,14,18,22,26,24,20,22,28,30,32,28,22,16,12,10,8,5];
-new Chart(document.getElementById('heatmapChart'),{type:'bar',data:{labels:Array.from({length:24},(_,i)=>`${i}h`),datasets:[{data:actH,backgroundColor:actH.map(v=>`rgba(59,130,246,${(v/35).toFixed(2)})`),borderRadius:3,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{...FT,size:9},color:'#999',maxTicksLimit:12},grid:{display:false}},y:{ticks:{font:FT,color:'#999'},grid:GR}}}});
-new Chart(document.getElementById('brandChart'),{type:'bar',data:{labels:BRANDS,datasets:[{data:[22,18,14,11,9,8,7,5,4,2],backgroundColor:'#1a1a1a',borderRadius:4,borderWidth:0,barThickness:14}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:FT,color:'#999',callback:v=>v+'%'},grid:GR},y:{ticks:{font:{...FT,size:11},color:'#555'},grid:{display:false}}}}});
-new Chart(document.getElementById('priceChart'),{type:'bar',data:{labels:['<$10','$10-25','$25-50','$50-100','$100-250','$250-500','>$500'],datasets:[{data:[8,14,22,28,18,7,3],backgroundColor:'#3B82F6',borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{...FT,size:10},color:'#999'},grid:{display:false}},y:{ticks:{font:FT,color:'#999',callback:v=>v+'%'},grid:GR}}}});
-new Chart(document.getElementById('sessionChart'),{type:'bar',data:{labels:['<1','1-3','3-5','5-10','10-20','20-30','>30'],datasets:[{data:[18,24,20,16,12,6,4],backgroundColor:'#8B5CF6',borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{...FT,size:10},color:'#999'},grid:{display:false}},y:{ticks:{font:FT,color:'#999',callback:v=>v+'%'},grid:GR}}}});
+window.eventTrendChartInstance=new Chart(document.getElementById('eventTrendChart'),{type:'line',data:{labels:days.map(d=>`D${d}`),datasets:[{label:'Views',data:days.map(()=>0),borderColor:'#3B82F6',backgroundColor:'rgba(59,130,246,.07)',fill:true,tension:.4,pointRadius:0,borderWidth:2},{label:'Cart',data:days.map(()=>0),borderColor:'#F59E0B',backgroundColor:'rgba(245,158,11,.07)',fill:true,tension:.4,pointRadius:0,borderWidth:2},{label:'Purchase',data:days.map(()=>0),borderColor:'#10B981',backgroundColor:'rgba(16,185,129,.07)',fill:true,tension:.4,pointRadius:0,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:FT,maxTicksLimit:8,color:'#999'},grid:{display:false}},y:{ticks:{font:FT,color:'#999',callback:v=>v>999999?Math.round(v/1000000)+'M':Math.round(v/1000)+'K'},grid:GR}}}});
+window.categoryChartInstance=new Chart(document.getElementById('categoryChart'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:['#3B82F6','#10B981','#F59E0B','#EF4444','#8B5CF6','#06B6D4'],borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{...FT,size:10},color:'#999'},grid:{display:false}},y:{ticks:{font:FT,color:'#999',callback:v=>v+'%'},grid:GR,max:50}}}});
+const actH=Array.from({length:24},()=>0);
+window.heatmapChartInstance=new Chart(document.getElementById('heatmapChart'),{type:'bar',data:{labels:Array.from({length:24},(_,i)=>`${i}h`),datasets:[{data:actH,backgroundColor:actH.map(v=>`rgba(59,130,246,${(v/35).toFixed(2)})`),borderRadius:3,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{...FT,size:9},color:'#999',maxTicksLimit:12},grid:{display:false}},y:{ticks:{font:FT,color:'#999'},grid:GR}}}});
+window.brandChartInstance=new Chart(document.getElementById('brandChart'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:'#1a1a1a',borderRadius:4,borderWidth:0,barThickness:14}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:FT,color:'#999',callback:v=>v+'%'},grid:GR},y:{ticks:{font:{...FT,size:11},color:'#555'},grid:{display:false}}}}});
+window.priceChartInstance=new Chart(document.getElementById('priceChart'),{type:'bar',data:{labels:['<$10','$10-25','$25-50','$50-100','$100-250','$250-500','>$500'],datasets:[{data:[0,0,0,0,0,0,0],backgroundColor:'#3B82F6',borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{...FT,size:10},color:'#999'},grid:{display:false}},y:{ticks:{font:FT,color:'#999',callback:v=>v+'%'},grid:GR}}}});
+window.sessionChartInstance=new Chart(document.getElementById('sessionChart'),{type:'bar',data:{labels:['<1','1-3','3-5','5-10','10-20','20-30','>30'],datasets:[{data:[0,0,0,0,0,0,0],backgroundColor:'#8B5CF6',borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{...FT,size:10},color:'#999'},grid:{display:false}},y:{ticks:{font:FT,color:'#999',callback:v=>v+'%'},grid:GR}}}});
 function rocPts(auc){const p=[{x:0,y:0}];for(let i=1;i<=20;i++){const fp=i/20;const tp=Math.pow(fp,1/(auc*2))*auc+fp*(1-auc)*.5;p.push({x:parseFloat(fp.toFixed(2)),y:parseFloat(Math.min(1,tp).toFixed(2))});}p.push({x:1,y:1});return p;}
-new Chart(document.getElementById('rocChart'),{type:'scatter',data:{datasets:[{label:'RF',data:rocPts(.958),showLine:true,borderColor:'#10B981',backgroundColor:'transparent',pointRadius:0,tension:.4,borderWidth:2.5},{label:'LR',data:rocPts(.871),showLine:true,borderColor:'#3B82F6',backgroundColor:'transparent',pointRadius:0,tension:.4,borderWidth:2},{label:'R',data:[{x:0,y:0},{x:1,y:1}],showLine:true,borderColor:'#ddd',backgroundColor:'transparent',pointRadius:0,borderDash:[4,4],borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'FPR',font:{size:10}},ticks:{font:FT,color:'#999'},grid:GR,min:0,max:1},y:{title:{display:true,text:'TPR',font:{size:10}},ticks:{font:FT,color:'#999'},grid:GR,min:0,max:1}}}});
+window.rocChartInstance=new Chart(document.getElementById('rocChart'),{type:'scatter',data:{datasets:[{label:'RF',data:rocPts(.958),showLine:true,borderColor:'#10B981',backgroundColor:'transparent',pointRadius:0,tension:.4,borderWidth:2.5},{label:'LR',data:rocPts(.871),showLine:true,borderColor:'#3B82F6',backgroundColor:'transparent',pointRadius:0,tension:.4,borderWidth:2},{label:'R',data:[{x:0,y:0},{x:1,y:1}],showLine:true,borderColor:'#ddd',backgroundColor:'transparent',pointRadius:0,borderDash:[4,4],borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'FPR',font:{size:10}},ticks:{font:FT,color:'#999'},grid:GR,min:0,max:1},y:{title:{display:true,text:'TPR',font:{size:10}},ticks:{font:FT,color:'#999'},grid:GR,min:0,max:1}}}});
 function genCluster(cx,cy,n){return Array.from({length:n},()=>({x:cx+(Math.random()-.5)*2,y:cy+(Math.random()-.5)*2,r:3}));}
 new Chart(document.getElementById('clusterChart'),{type:'bubble',data:{datasets:[{label:'Browsers',data:genCluster(-2,-1,80),backgroundColor:'rgba(59,130,246,.5)',borderColor:'#3B82F6',borderWidth:.5},{label:'Buyers',data:genCluster(1.5,2,50),backgroundColor:'rgba(16,185,129,.5)',borderColor:'#10B981',borderWidth:.5},{label:'Researchers',data:genCluster(-1,2.5,50),backgroundColor:'rgba(245,158,11,.5)',borderColor:'#F59E0B',borderWidth:.5},{label:'High-Value',data:genCluster(2,-2,40),backgroundColor:'rgba(239,68,68,.5)',borderColor:'#EF4444',borderWidth:.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'PC1',font:{size:10}},ticks:{font:FT,color:'#999'},grid:GR},y:{title:{display:true,text:'PC2',font:{size:10}},ticks:{font:FT,color:'#999'},grid:GR}}}});
 new Chart(document.getElementById('elbowChart'),{type:'line',data:{labels:['2','3','4','5','6','7','8'],datasets:[{data:[120000,80000,48200,42000,38500,36000,34800],borderColor:'#1a1a1a',backgroundColor:'rgba(26,26,26,.06)',fill:true,tension:.4,pointRadius:[3,3,6,3,3,3,3],pointBackgroundColor:['#888','#888','#EF4444','#888','#888','#888','#888'],borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'K clusters',font:{size:10}},ticks:{font:FT,color:'#999'},grid:{display:false}},y:{ticks:{font:FT,color:'#999',callback:v=>Math.round(v/1000)+'K'},grid:GR}}}});
 const radarD=[{label:'Browsers',data:[85,15,8,35,40,20],color:'#3B82F6'},{label:'Buyers',data:[55,70,80,65,60,75],color:'#10B981'},{label:'Researchers',data:[95,45,25,80,55,35],color:'#F59E0B'},{label:'High-Value',data:[60,85,92,70,90,88],color:'#EF4444'}];
 radarD.forEach((rd,i)=>{new Chart(document.getElementById('radar'+i),{type:'radar',data:{labels:['Views','Cart','Purchase','Session','Price','Loyalty'],datasets:[{label:rd.label,data:rd.data,backgroundColor:rd.color+'26',borderColor:rd.color,pointBackgroundColor:rd.color,borderWidth:2,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{...FT,size:10},color:'#333',boxWidth:8}}},scales:{r:{ticks:{display:false},grid:{color:'rgba(0,0,0,.06)'},pointLabels:{font:{...FT,size:10},color:'#666'},min:0,max:100}}}});});
-new Chart(document.getElementById('predDistChart'),{type:'bar',data:{labels:['0.0','0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0'],datasets:[{data:[32000,65000,78000,85000,92000,88000,74000,62000,48000,36000,18000],backgroundColor:['#FEE2E2','#FEE2E2','#FEE2E2','#FEF3C7','#FEF3C7','#FEF3C7','#FEF3C7','#DCFCE7','#DCFCE7','#DCFCE7','#DCFCE7'],borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Purchase Probability',font:{size:10}},ticks:{font:FT,color:'#999'},grid:{display:false}},y:{ticks:{font:FT,color:'#999',callback:v=>Math.round(v/1000)+'K'},grid:GR}}}});
+window.predDistChartInstance=new Chart(document.getElementById('predDistChart'),{type:'bar',data:{labels:['0.0','0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0'],datasets:[{data:[0,0,0,0,0,0,0,0,0,0,0],backgroundColor:['#FEE2E2','#FEE2E2','#FEE2E2','#FEF3C7','#FEF3C7','#FEF3C7','#FEF3C7','#DCFCE7','#DCFCE7','#DCFCE7','#DCFCE7'],borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Purchase Probability',font:{size:10}},ticks:{font:FT,color:'#999'},grid:{display:false}},y:{ticks:{font:FT,color:'#999',callback:v=>Math.round(v/1000)+'K'},grid:GR}}}});
 function prCurve(auc){const p=[];for(let i=0;i<=20;i++){const r=i/20;const pr=auc-r*(auc-.4)+(Math.random()*.02-.01);p.push({x:parseFloat(r.toFixed(2)),y:parseFloat(Math.max(.3,Math.min(1,pr)).toFixed(2))});}return p;}
-new Chart(document.getElementById('prChart'),{type:'scatter',data:{datasets:[{label:'RF',data:prCurve(.92),showLine:true,borderColor:'#10B981',backgroundColor:'transparent',pointRadius:0,tension:.4,borderWidth:2.5},{label:'LR',data:prCurve(.81),showLine:true,borderColor:'#3B82F6',backgroundColor:'transparent',pointRadius:0,tension:.4,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Recall',font:{size:10}},ticks:{font:FT,color:'#999'},grid:GR,min:0,max:1},y:{title:{display:true,text:'Precision',font:{size:10}},ticks:{font:FT,color:'#999'},grid:GR,min:0,max:1}}}});
+window.prChartInstance=new Chart(document.getElementById('prChart'),{type:'scatter',data:{datasets:[{label:'RF',data:[],showLine:true,borderColor:'#10B981',backgroundColor:'transparent',pointRadius:0,tension:.4,borderWidth:2.5},{label:'LR',data:[],showLine:true,borderColor:'#3B82F6',backgroundColor:'transparent',pointRadius:0,tension:.4,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Recall',font:{size:10}},ticks:{font:FT,color:'#999'},grid:GR,min:0,max:1},y:{title:{display:true,text:'Precision',font:{size:10}},ticks:{font:FT,color:'#999'},grid:GR,min:0,max:1}}}});
 new Chart(document.getElementById('journeyDonut'),{type:'doughnut',data:{labels:['Views','Cart','Purchase'],datasets:[{data:[22,5,3],backgroundColor:['#3B82F6','#F59E0B','#10B981'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'right',labels:{font:{...FT,size:11},color:'#333',boxWidth:10,padding:8}}},cutout:'65%'}});
 
 updateNewCustPreview();
+loadDashboardSummary(false);
+loadDashboardData(false);
+loadPredictionsData(false);
 </script>
 </body>
 </html>
