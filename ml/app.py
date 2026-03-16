@@ -19,7 +19,25 @@ from predict import load_models, score_row  # noqa: E402
 app = Flask(__name__)
 CORS(app)
 
-lr_model, rf_model, km_model, scaler, feature_cols = load_models()
+MODELS = None
+MODEL_LOAD_ERROR = None
+
+
+def get_models():
+    global MODELS, MODEL_LOAD_ERROR
+    if MODELS is not None:
+        return MODELS
+    if MODEL_LOAD_ERROR is not None:
+        return None
+
+    try:
+        MODELS = load_models()
+        return MODELS
+    except SystemExit as exc:
+        MODEL_LOAD_ERROR = str(exc)
+    except Exception as exc:
+        MODEL_LOAD_ERROR = f"Unexpected model load error: {exc}"
+    return None
 
 
 @app.get("/")
@@ -29,7 +47,12 @@ def index():
 
 @app.get("/healthz")
 def healthz():
-    return jsonify({"status": "ok"})
+    models_ready = get_models() is not None
+    return jsonify({
+        "status": "ok",
+        "models_ready": models_ready,
+        "model_error": MODEL_LOAD_ERROR,
+    })
 
 
 @app.get("/api/metrics")
@@ -41,6 +64,14 @@ def metrics():
 
 @app.post("/api/predict/existing")
 def predict_existing():
+    models = get_models()
+    if models is None:
+        return jsonify({
+            "error": "Models are not available on this deployment.",
+            "details": MODEL_LOAD_ERROR,
+        }), 503
+
+    lr_model, rf_model, km_model, scaler, feature_cols = models
     body = request.get_json(force=True) or {}
 
     views = int(body.get("views", 0))
@@ -69,6 +100,14 @@ def predict_existing():
 
 @app.post("/api/predict/new")
 def predict_new():
+    models = get_models()
+    if models is None:
+        return jsonify({
+            "error": "Models are not available on this deployment.",
+            "details": MODEL_LOAD_ERROR,
+        }), 503
+
+    lr_model, rf_model, km_model, scaler, feature_cols = models
     body = request.get_json(force=True) or {}
 
     views = int(body.get("views", 0))
