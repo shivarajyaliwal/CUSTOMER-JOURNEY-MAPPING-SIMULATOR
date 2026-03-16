@@ -55,6 +55,9 @@ REPORTS_DIR = "reports"
 RANDOM_SEED = 42
 TEST_SIZE   = 0.20
 N_CLUSTERS  = 4
+KM_MIN_CLUSTERS = 3
+KM_MAX_CLUSTERS = 8
+KM_TUNING_MAX_SAMPLES = 120_000
 RF_TUNING_ITERS = 18
 RF_TUNING_MAX_SAMPLES = 120_000
 
@@ -225,16 +228,48 @@ def train_random_forest(X_train, y_train):
 
 
 def train_kmeans(X_scaled):
-    print(f"[KM] Training K-Means with k={N_CLUSTERS} …")
+    from sklearn.metrics import silhouette_score
+
+    X_tune = X_scaled
+    if len(X_scaled) > KM_TUNING_MAX_SAMPLES:
+        rng = np.random.default_rng(RANDOM_SEED)
+        idx = rng.choice(len(X_scaled), size=KM_TUNING_MAX_SAMPLES, replace=False)
+        X_tune = X_scaled[idx]
+        print(f"[KM] Using sample for K search: {len(X_tune):,}")
+
+    best_k = N_CLUSTERS
+    best_score = -1.0
+    best_inertia = float("inf")
+    silhouette_by_k = {}
+
+    for k in range(KM_MIN_CLUSTERS, KM_MAX_CLUSTERS + 1):
+        trial = KMeans(
+            n_clusters=k,
+            init="k-means++",
+            n_init=20,
+            max_iter=400,
+            random_state=RANDOM_SEED,
+        )
+        labels = trial.fit_predict(X_tune)
+        score = silhouette_score(X_tune, labels, random_state=RANDOM_SEED)
+        silhouette_by_k[str(k)] = round(float(score), 4)
+        if score > best_score or (np.isclose(score, best_score) and trial.inertia_ < best_inertia):
+            best_k = k
+            best_score = float(score)
+            best_inertia = float(trial.inertia_)
+
+    print(f"[KM] Best k by silhouette: {best_k} (score={best_score:.4f})")
+    print(f"[KM] Candidate silhouette scores: {silhouette_by_k}")
+
     model = KMeans(
-        n_clusters=N_CLUSTERS,
+        n_clusters=best_k,
         init="k-means++",
-        n_init=10,
-        max_iter=300,
+        n_init=30,
+        max_iter=500,
         random_state=RANDOM_SEED,
     )
     model.fit(X_scaled)
-    return model
+    return model, silhouette_by_k
 
 
 # ──────────────────────────────────────────────
@@ -275,7 +310,7 @@ def evaluate_classifier(name, model, X_test, y_test, scaler=None):
     return metrics, report
 
 
-def evaluate_kmeans(model, X_scaled):
+def evaluate_kmeans(model, X_scaled, silhouette_by_k=None):
     from sklearn.metrics import silhouette_score
     labels   = model.labels_
     inertia  = model.inertia_
@@ -283,7 +318,7 @@ def evaluate_kmeans(model, X_scaled):
     counts   = pd.Series(labels).value_counts().sort_index().to_dict()
 
     print(f"\n{'='*50}")
-    print(f"  K-Means (k={N_CLUSTERS})")
+    print(f"  K-Means (k={model.n_clusters})")
     print(f"{'='*50}")
     print(f"  Inertia         : {inertia:,.1f}")
     print(f"  Silhouette Score: {sil:.4f}")
@@ -292,11 +327,37 @@ def evaluate_kmeans(model, X_scaled):
 
     return {
         "model":            "K-Means",
-        "k":                N_CLUSTERS,
+        "k":                int(model.n_clusters),
         "inertia":          round(inertia, 2),
         "silhouette_score": round(sil, 4),
         "cluster_sizes":    {str(k): int(v) for k, v in counts.items()},
+        "silhouette_by_k":  silhouette_by_k or {},
     }
+
+
+def build_cluster_metadata(labels: np.ndarray, y: np.ndarray):
+    profile = pd.DataFrame({"cluster": labels.astype(int), "label": y.astype(int)})
+    by_cluster = profile.groupby("cluster")["label"].mean().sort_index()
+
+    cluster_buy_prob = {int(cid): round(float(rate), 4) for cid, rate in by_cluster.items()}
+
+    ranked = by_cluster.sort_values().index.tolist()
+    ordered_names = [
+        "Browsers",
+        "Researchers",
+        "Active Buyers",
+        "High-Value",
+        "Loyal Specialists",
+        "Premium Intent",
+        "Power Shoppers",
+        "VIP",
+    ]
+    cluster_names = {}
+    for rank, cid in enumerate(ranked):
+        name = ordered_names[rank] if rank < len(ordered_names) else f"Segment {int(cid)}"
+        cluster_names[int(cid)] = name
+
+    return cluster_buy_prob, cluster_names
 
 
 def build_dashboard_report(raw_df: pd.DataFrame | None, feat_df: pd.DataFrame, data_paths: list[str]):
@@ -546,12 +607,14 @@ def main(data_paths: list[str], synthetic_sessions: int = 100_000, rf_tuning_ite
     # ── Train ────────────────────────────────
     lr  = train_logistic_regression(X_tr, y_tr)
     rf  = train_random_forest(X_tr, y_tr)
-    km  = train_kmeans(X_scaled_all)
+    km, km_silhouette_by_k = train_kmeans(X_scaled_all)
 
     # ── Evaluate ─────────────────────────────
     lr_metrics, lr_report = evaluate_classifier("Logistic Regression", lr, X_te, y_te)
     rf_metrics, rf_report = evaluate_classifier("Random Forest",        rf, X_te, y_te)
-    km_metrics            = evaluate_kmeans(km, X_scaled_all)
+    km_metrics            = evaluate_kmeans(km, X_scaled_all, km_silhouette_by_k)
+
+    cluster_buy_prob, cluster_names = build_cluster_metadata(km.labels_, y)
 
     # ── Save models ──────────────────────────
     joblib.dump(lr,     os.path.join(MODELS_DIR, "logistic_regression.pkl"))
@@ -562,11 +625,19 @@ def main(data_paths: list[str], synthetic_sessions: int = 100_000, rf_tuning_ite
     with open(os.path.join(MODELS_DIR, "feature_columns.json"), "w") as f:
         json.dump(FEATURE_COLS, f, indent=2)
 
+    with open(os.path.join(MODELS_DIR, "cluster_buy_prob.json"), "w") as f:
+        json.dump(cluster_buy_prob, f, indent=2)
+
+    with open(os.path.join(MODELS_DIR, "cluster_names.json"), "w") as f:
+        json.dump(cluster_names, f, indent=2)
+
     # ── Save reports ─────────────────────────
     report_data = {
         "logistic_regression": lr_metrics,
         "random_forest":       rf_metrics,
         "kmeans":              km_metrics,
+        "cluster_buy_prob":    {str(k): v for k, v in cluster_buy_prob.items()},
+        "cluster_names":       {str(k): v for k, v in cluster_names.items()},
     }
     with open(os.path.join(REPORTS_DIR, "metrics_report.json"), "w") as f:
         json.dump(report_data, f, indent=2)

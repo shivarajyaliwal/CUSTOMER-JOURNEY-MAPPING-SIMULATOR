@@ -33,8 +33,10 @@ import pandas as pd
 
 MODELS_DIR   = "models"
 FEATURE_COLS_PATH = os.path.join(MODELS_DIR, "feature_columns.json")
+CLUSTER_BUY_PROB_PATH = os.path.join(MODELS_DIR, "cluster_buy_prob.json")
+CLUSTER_NAMES_PATH = os.path.join(MODELS_DIR, "cluster_names.json")
 
-CLUSTER_NAMES = {
+DEFAULT_CLUSTER_NAMES = {
     0: "Browsers",
     1: "Active Buyers",
     2: "Researchers",
@@ -42,7 +44,27 @@ CLUSTER_NAMES = {
 }
 
 # Purchase probability per cluster (learned from training)
-CLUSTER_BUY_PROB = {0: 0.08, 1: 0.75, 2: 0.22, 3: 0.92}
+DEFAULT_CLUSTER_BUY_PROB = {0: 0.08, 1: 0.75, 2: 0.22, 3: 0.92}
+
+CLUSTER_NAMES = dict(DEFAULT_CLUSTER_NAMES)
+CLUSTER_BUY_PROB = dict(DEFAULT_CLUSTER_BUY_PROB)
+
+
+def _load_cluster_metadata():
+    global CLUSTER_NAMES, CLUSTER_BUY_PROB
+
+    CLUSTER_NAMES = dict(DEFAULT_CLUSTER_NAMES)
+    CLUSTER_BUY_PROB = dict(DEFAULT_CLUSTER_BUY_PROB)
+
+    if os.path.exists(CLUSTER_NAMES_PATH):
+        with open(CLUSTER_NAMES_PATH) as f:
+            raw_names = json.load(f)
+        CLUSTER_NAMES.update({int(k): str(v) for k, v in raw_names.items()})
+
+    if os.path.exists(CLUSTER_BUY_PROB_PATH):
+        with open(CLUSTER_BUY_PROB_PATH) as f:
+            raw_probs = json.load(f)
+        CLUSTER_BUY_PROB.update({int(k): float(v) for k, v in raw_probs.items()})
 
 
 def load_models():
@@ -61,6 +83,8 @@ def load_models():
 
     with open(FEATURE_COLS_PATH) as f:
         feature_cols = json.load(f)
+
+    _load_cluster_metadata()
 
     return lr, rf, km, scaler, feature_cols
 
