@@ -19,6 +19,7 @@ os.chdir(BASE_DIR)
 sys.path.insert(0, str(BASE_DIR))
 
 from predict import CLUSTER_BUY_PROB, CLUSTER_NAMES, load_models, score_row  # noqa: E402
+from train_models import build_dashboard_report, generate_synthetic_data  # noqa: E402
 
 app = Flask(__name__)
 CORS(app)
@@ -209,28 +210,10 @@ def _load_dashboard_data():
 
     candidate_files = sorted((PROJECT_DIR / "data_sample").glob("*.csv"))
     if not candidate_files:
-        return {
-            "overview": {
-                "total_events": 0,
-                "unique_users": 0,
-                "purchase_rate": 0.0,
-                "cart_abandonment": 0.0,
-            },
-            "session_stats": {
-                "total_sessions": 0,
-                "purchased_sessions": 0,
-                "cart_sessions": 0,
-                "abandoned_cart_sessions": 0,
-            },
-            "funnel": {"view": 0, "cart": 0, "purchase": 0},
-            "daily_event_volume": {"labels": [], "view": [], "cart": [], "purchase": []},
-            "top_categories": {"labels": [], "values": []},
-            "hourly_activity": {"labels": [f"{h}h" for h in range(24)], "values": [0] * 24},
-            "top_brands": {"labels": [], "values": []},
-            "price_distribution": {"labels": ["<$10", "$10-25", "$25-50", "$50-100", "$100-250", "$250-500", ">$500"], "values": [0.0] * 7},
-            "session_duration_distribution": {"labels": ["<1", "1-3", "3-5", "5-10", "10-20", "20-30", ">30"], "values": [0.0] * 7},
-            "source": "fallback-empty",
-        }, None
+        demo_feat = generate_synthetic_data(n=25_000)
+        payload = build_dashboard_report(None, demo_feat, ["synthetic-demo"])
+        payload["source"] = "synthetic-demo"
+        return payload, None
 
     latest = max(candidate_files, key=lambda p: p.stat().st_mtime)
     raw = pd.read_csv(latest)
@@ -285,9 +268,8 @@ def _compress_pr_curve(recall_vals, precision_vals, max_points=30):
     return r, p
 
 
-def _build_predictions_payload(raw_df: pd.DataFrame, models):
+def _build_predictions_payload_from_features(feat: pd.DataFrame, models):
     lr_model, rf_model, km_model, scaler, feature_cols = models
-    feat = _engineer_session_features(raw_df)
     if feat.empty:
         return {
             "users_scored": 0,
@@ -298,6 +280,13 @@ def _build_predictions_payload(raw_df: pd.DataFrame, models):
             "pr_curve": {"rf": {"recall": [0.0, 1.0], "precision": [1.0, 0.0]}, "lr": {"recall": [0.0, 1.0], "precision": [1.0, 0.0]}},
             "top_users": [],
         }
+
+    if "user_id" not in feat.columns:
+        feat = feat.copy()
+        feat["user_id"] = np.arange(1, len(feat) + 1, dtype=int)
+    if "purchase_count" not in feat.columns:
+        feat = feat.copy()
+        feat["purchase_count"] = feat.get("label", pd.Series([0] * len(feat))).astype(int)
 
     x = feat[feature_cols].astype(float).fillna(0.0)
     x_scaled = scaler.transform(x.values)
@@ -367,8 +356,12 @@ def _build_predictions_payload(raw_df: pd.DataFrame, models):
     }
 
 
-def _build_predictions_payload_heuristic(raw_df: pd.DataFrame):
+def _build_predictions_payload(raw_df: pd.DataFrame, models):
     feat = _engineer_session_features(raw_df)
+    return _build_predictions_payload_from_features(feat, models)
+
+
+def _build_predictions_payload_heuristic_from_features(feat: pd.DataFrame):
     if feat.empty:
         return {
             "users_scored": 0,
@@ -380,6 +373,13 @@ def _build_predictions_payload_heuristic(raw_df: pd.DataFrame):
             "top_users": [],
             "inference_mode": "heuristic",
         }
+
+    if "user_id" not in feat.columns:
+        feat = feat.copy()
+        feat["user_id"] = np.arange(1, len(feat) + 1, dtype=int)
+    if "purchase_count" not in feat.columns:
+        feat = feat.copy()
+        feat["purchase_count"] = feat.get("label", pd.Series([0] * len(feat))).astype(int)
 
     views = feat["view_count"].astype(float).values
     carts = feat["cart_count"].astype(float).values
@@ -495,6 +495,11 @@ def _build_predictions_payload_heuristic(raw_df: pd.DataFrame):
     }
 
 
+def _build_predictions_payload_heuristic(raw_df: pd.DataFrame):
+    feat = _engineer_session_features(raw_df)
+    return _build_predictions_payload_heuristic_from_features(feat)
+
+
 def _load_predictions_data():
     global PREDICTIONS_CACHE, PREDICTIONS_CACHE_KEY
 
@@ -502,16 +507,22 @@ def _load_predictions_data():
 
     candidate_files = sorted((PROJECT_DIR / "data_sample").glob("*.csv"))
     if not candidate_files:
-        return {
-            "users_scored": 0,
-            "high_propensity": 0,
-            "mid_propensity": 0,
-            "low_propensity": 0,
-            "score_distribution": {"labels": [f"{i/10:.1f}" for i in range(11)], "values": [0] * 11},
-            "pr_curve": {"rf": {"recall": [0.0, 1.0], "precision": [1.0, 0.0]}, "lr": {"recall": [0.0, 1.0], "precision": [1.0, 0.0]}},
-            "top_users": [],
-            "source": "fallback-empty",
-        }, None, None
+        mode = "ml" if models is not None else "heuristic"
+        cache_key = ("synthetic-demo", mode)
+        if PREDICTIONS_CACHE is not None and PREDICTIONS_CACHE_KEY == cache_key:
+            return PREDICTIONS_CACHE, None, None
+
+        demo_feat = generate_synthetic_data(n=25_000)
+        if models is None:
+            payload = _build_predictions_payload_heuristic_from_features(demo_feat)
+            payload["model_error"] = MODEL_LOAD_ERROR
+        else:
+            payload = _build_predictions_payload_from_features(demo_feat, models)
+            payload["inference_mode"] = "ml"
+        payload["source"] = "synthetic-demo"
+        PREDICTIONS_CACHE = payload
+        PREDICTIONS_CACHE_KEY = cache_key
+        return payload, None, None
 
     latest = max(candidate_files, key=lambda p: p.stat().st_mtime)
     mode = "ml" if models is not None else "heuristic"
