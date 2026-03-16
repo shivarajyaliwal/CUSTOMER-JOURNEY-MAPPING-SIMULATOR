@@ -18,7 +18,7 @@ DASHBOARD_DIR = PROJECT_DIR / "dashboard"
 os.chdir(BASE_DIR)
 sys.path.insert(0, str(BASE_DIR))
 
-from predict import CLUSTER_BUY_PROB, CLUSTER_NAMES, load_models, score_row  # noqa: E402
+from predict import CLUSTER_BUY_PROB, CLUSTER_NAMES, load_models, score_row, transform_for_kmeans  # noqa: E402
 from train_models import build_dashboard_report, generate_synthetic_data  # noqa: E402
 
 app = Flask(__name__)
@@ -293,7 +293,7 @@ def _build_predictions_payload_from_features(feat: pd.DataFrame, models):
 
     lr_probs = lr_model.predict_proba(x_scaled)[:, 1]
     rf_probs = rf_model.predict_proba(x_scaled)[:, 1]
-    clusters = km_model.predict(x_scaled).astype(int)
+    clusters = km_model.predict(transform_for_kmeans(x_scaled)).astype(int)
     km_probs = np.array([CLUSTER_BUY_PROB.get(int(c), 0.3) for c in clusters], dtype=float)
     ensemble = (lr_probs * 0.30) + (rf_probs * 0.50) + (km_probs * 0.20)
 

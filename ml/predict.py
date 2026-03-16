@@ -35,6 +35,7 @@ MODELS_DIR   = "models"
 FEATURE_COLS_PATH = os.path.join(MODELS_DIR, "feature_columns.json")
 CLUSTER_BUY_PROB_PATH = os.path.join(MODELS_DIR, "cluster_buy_prob.json")
 CLUSTER_NAMES_PATH = os.path.join(MODELS_DIR, "cluster_names.json")
+KM_FEATURE_WEIGHTS_PATH = os.path.join(MODELS_DIR, "km_feature_weights.json")
 
 DEFAULT_CLUSTER_NAMES = {
     0: "Browsers",
@@ -48,10 +49,11 @@ DEFAULT_CLUSTER_BUY_PROB = {0: 0.08, 1: 0.75, 2: 0.22, 3: 0.92}
 
 CLUSTER_NAMES = dict(DEFAULT_CLUSTER_NAMES)
 CLUSTER_BUY_PROB = dict(DEFAULT_CLUSTER_BUY_PROB)
+KM_FEATURE_WEIGHTS = None
 
 
 def _load_cluster_metadata():
-    global CLUSTER_NAMES, CLUSTER_BUY_PROB
+    global CLUSTER_NAMES, CLUSTER_BUY_PROB, KM_FEATURE_WEIGHTS
 
     CLUSTER_NAMES = dict(DEFAULT_CLUSTER_NAMES)
     CLUSTER_BUY_PROB = dict(DEFAULT_CLUSTER_BUY_PROB)
@@ -65,6 +67,16 @@ def _load_cluster_metadata():
         with open(CLUSTER_BUY_PROB_PATH) as f:
             raw_probs = json.load(f)
         CLUSTER_BUY_PROB.update({int(k): float(v) for k, v in raw_probs.items()})
+
+    if os.path.exists(KM_FEATURE_WEIGHTS_PATH):
+        with open(KM_FEATURE_WEIGHTS_PATH) as f:
+            KM_FEATURE_WEIGHTS = np.asarray(json.load(f), dtype=float)
+
+
+def transform_for_kmeans(X: np.ndarray) -> np.ndarray:
+    if KM_FEATURE_WEIGHTS is None:
+        return X
+    return np.asarray(X, dtype=float) * KM_FEATURE_WEIGHTS
 
 
 def load_models():
@@ -96,7 +108,7 @@ def score_row(row_dict: dict, lr, rf, km, scaler, feature_cols) -> dict:
 
     lr_prob  = float(lr.predict_proba(X)[0, 1])
     rf_prob  = float(rf.predict_proba(X)[0, 1])
-    cluster  = int(km.predict(X)[0])
+    cluster  = int(km.predict(transform_for_kmeans(X))[0])
     km_prob  = CLUSTER_BUY_PROB.get(cluster, 0.3)
     ensemble = lr_prob * 0.30 + rf_prob * 0.50 + km_prob * 0.20
 
