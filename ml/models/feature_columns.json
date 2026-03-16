@@ -1,0 +1,11 @@
+[
+  "view_count",
+  "cart_count",
+  "session_duration",
+  "avg_price_viewed",
+  "unique_categories",
+  "unique_brands",
+  "brand_loyalty",
+  "cart_to_view_ratio",
+  "price_range"
+]
