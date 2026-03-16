@@ -359,12 +359,138 @@ def _build_predictions_payload(raw_df: pd.DataFrame, models):
     }
 
 
+def _build_predictions_payload_heuristic(raw_df: pd.DataFrame):
+    feat = _engineer_session_features(raw_df)
+    if feat.empty:
+        return {
+            "users_scored": 0,
+            "high_propensity": 0,
+            "mid_propensity": 0,
+            "low_propensity": 0,
+            "score_distribution": {"labels": [f"{i/10:.1f}" for i in range(11)], "values": [0] * 11},
+            "pr_curve": {"rf": {"recall": [0.0, 1.0], "precision": [1.0, 0.0]}, "lr": {"recall": [0.0, 1.0], "precision": [1.0, 0.0]}},
+            "top_users": [],
+            "inference_mode": "heuristic",
+        }
+
+    views = feat["view_count"].astype(float).values
+    carts = feat["cart_count"].astype(float).values
+    purchases = feat["purchase_count"].astype(float).values
+    duration = feat["session_duration"].astype(float).values
+    avg_price = feat["avg_price_viewed"].astype(float).values
+    cats = feat["unique_categories"].astype(float).values
+    loyalty = feat["brand_loyalty"].astype(float).values
+
+    rf_probs = (
+        np.minimum(views / 40.0, 1.0) * 0.28
+        + np.minimum(carts / 10.0, 1.0) * 0.24
+        + np.minimum(purchases / 5.0, 1.0) * 0.10
+        + np.minimum(duration / 30.0, 1.0) * 0.18
+        + np.minimum(avg_price / 300.0, 1.0) * 0.06
+        + np.minimum(cats / 8.0, 1.0) * 0.06
+        + np.minimum(loyalty, 1.0) * 0.05
+    )
+    rf_probs += np.where(views > 0, (carts / np.maximum(views, 1.0)) * 0.08, 0.0)
+    rf_probs = np.clip(rf_probs, 0.01, 0.99)
+
+    z = (
+        -2.1
+        + views * 0.04
+        + carts * 0.18
+        + purchases * 0.25
+        + duration * 0.04
+        + (avg_price / 100.0) * 0.12
+        + cats * 0.08
+        + loyalty * 1.4
+    )
+    lr_probs = 1.0 / (1.0 + np.exp(-z * 0.7))
+    lr_probs = np.clip(lr_probs, 0.01, 0.99)
+
+    centroids = np.array([
+        [28.0, 1.2, 0.1, 60.0, 2.0],
+        [15.0, 4.8, 3.2, 120.0, 6.0],
+        [52.0, 3.1, 0.8, 85.0, 3.0],
+        [18.0, 6.2, 5.8, 280.0, 8.0],
+    ])
+    points = np.column_stack([
+        views,
+        carts,
+        purchases,
+        avg_price,
+        loyalty * 10.0,
+    ])
+    diffs = points[:, None, :] - centroids[None, :, :]
+    weights = np.array([40.0, 10.0, 6.0, 200.0, 10.0])
+    dists = ((diffs / weights) ** 2).sum(axis=2)
+    clusters = dists.argmin(axis=1)
+    km_probs = np.array([CLUSTER_BUY_PROB.get(int(c), 0.3) for c in clusters], dtype=float)
+
+    ensemble = (lr_probs * 0.30) + (rf_probs * 0.50) + (km_probs * 0.20)
+
+    users_scored = int(len(feat))
+    high_propensity = int((rf_probs > 0.7).sum())
+    mid_propensity = int(((rf_probs >= 0.3) & (rf_probs <= 0.7)).sum())
+    low_propensity = int((rf_probs < 0.3).sum())
+
+    hist, _ = np.histogram(rf_probs, bins=np.linspace(0.0, 1.0, 12))
+    distribution = {
+        "labels": [f"{i/10:.1f}" for i in range(11)],
+        "values": [int(v) for v in hist.tolist()],
+    }
+
+    y_true = feat["label"].values
+    if len(np.unique(y_true)) > 1:
+        rf_precision, rf_recall, _ = precision_recall_curve(y_true, rf_probs)
+        lr_precision, lr_recall, _ = precision_recall_curve(y_true, lr_probs)
+        rf_r, rf_p = _compress_pr_curve(rf_recall, rf_precision)
+        lr_r, lr_p = _compress_pr_curve(lr_recall, lr_precision)
+    else:
+        rf_r, rf_p = [0.0, 1.0], [1.0, 1.0]
+        lr_r, lr_p = [0.0, 1.0], [1.0, 1.0]
+
+    scored = feat[["user_id", "view_count", "cart_count", "purchase_count", "avg_price_viewed"]].copy()
+    scored["cluster"] = clusters
+    scored["cluster_name"] = [CLUSTER_NAMES.get(int(c), "Unknown") for c in clusters]
+    scored["rf_score"] = rf_probs
+    scored["lr_score"] = lr_probs
+    scored["ensemble_score"] = ensemble
+    scored["propensity"] = np.where(rf_probs > 0.7, "high", np.where(rf_probs >= 0.3, "med", "low"))
+
+    top = scored.sort_values("rf_score", ascending=False).head(25)
+    top_users = []
+    for _, row in top.iterrows():
+        top_users.append({
+            "id": str(row["user_id"]),
+            "views": int(row["view_count"]),
+            "carts": int(row["cart_count"]),
+            "purchases": int(row["purchase_count"]),
+            "avgPrice": f"${int(round(float(row['avg_price_viewed'])))}",
+            "cluster": int(row["cluster"]),
+            "cluster_name": row["cluster_name"],
+            "rfS": round(float(row["rf_score"]), 3),
+            "lrS": round(float(row["lr_score"]), 3),
+            "prop": row["propensity"],
+        })
+
+    return {
+        "users_scored": users_scored,
+        "high_propensity": high_propensity,
+        "mid_propensity": mid_propensity,
+        "low_propensity": low_propensity,
+        "score_distribution": distribution,
+        "pr_curve": {
+            "rf": {"recall": rf_r, "precision": rf_p},
+            "lr": {"recall": lr_r, "precision": lr_p},
+        },
+        "top_users": top_users,
+        "inference_mode": "heuristic",
+    }
+
+
 def _load_predictions_data():
     global PREDICTIONS_CACHE, PREDICTIONS_CACHE_KEY
 
     models = get_models()
-    if models is None:
-        return None, None, "models-unavailable"
 
     candidate_files = sorted((PROJECT_DIR / "data_sample").glob("*.csv"))
     if not candidate_files:
@@ -380,12 +506,18 @@ def _load_predictions_data():
         }, None, None
 
     latest = max(candidate_files, key=lambda p: p.stat().st_mtime)
-    cache_key = (str(latest), latest.stat().st_mtime)
+    mode = "ml" if models is not None else "heuristic"
+    cache_key = (str(latest), latest.stat().st_mtime, mode)
     if PREDICTIONS_CACHE is not None and PREDICTIONS_CACHE_KEY == cache_key:
         return PREDICTIONS_CACHE, latest, None
 
     raw = pd.read_csv(latest)
-    payload = _build_predictions_payload(raw, models)
+    if models is None:
+        payload = _build_predictions_payload_heuristic(raw)
+        payload["model_error"] = MODEL_LOAD_ERROR
+    else:
+        payload = _build_predictions_payload(raw, models)
+        payload["inference_mode"] = "ml"
     payload["source"] = latest.name
     PREDICTIONS_CACHE = payload
     PREDICTIONS_CACHE_KEY = cache_key
@@ -551,11 +683,6 @@ def dashboard_data():
 @app.get("/api/predictions-data")
 def predictions_data():
     payload, source_path, err = _load_predictions_data()
-    if err == "models-unavailable":
-        return jsonify({
-            "error": "Models are not available on this deployment.",
-            "details": MODEL_LOAD_ERROR,
-        }), 503
 
     last_updated = None
     if source_path is not None:

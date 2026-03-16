@@ -636,17 +636,34 @@ function shortNumber(value){
 async function fetchApi(path){
   const cacheBust=`_ts=${Date.now()}`;
   const withQuery=path.includes('?')?`${path}&${cacheBust}`:`${path}?${cacheBust}`;
-  const targets=[
-    withQuery,
-    `http://127.0.0.1:5000${withQuery}`,
-    `http://localhost:5000${withQuery}`,
-  ];
+
+  const configuredBase=(window.__API_BASE_URL__||localStorage.getItem('ECOMML_API_BASE_URL')||'').trim().replace(/\/$/, '');
+  const origin=window.location.origin.replace(/\/$/, '');
+  const isLocalHost=['localhost','127.0.0.1'].includes(window.location.hostname);
+
+  const targets=[];
+  if(configuredBase){
+    targets.push(`${configuredBase}${withQuery}`);
+  }
+  targets.push(`${origin}${withQuery}`);
+  if(isLocalHost){
+    targets.push(`http://127.0.0.1:5000${withQuery}`);
+    targets.push(`http://localhost:5000${withQuery}`);
+  }
+
   let lastError=null;
   for(const url of targets){
     try{
       const res=await fetch(url,{cache:'no-store'});
       if(!res.ok){
-        throw new Error(`HTTP ${res.status}`);
+        let details='';
+        try{
+          const body=await res.json();
+          details=body.details||body.error||JSON.stringify(body);
+        }catch(_){
+          details=await res.text();
+        }
+        throw new Error(`HTTP ${res.status}${details?` - ${details}`:''}`);
       }
       return await res.json();
     }catch(err){
@@ -1061,7 +1078,7 @@ async function loadDashboardData(showToast=true){
     document.getElementById('m-cart-d').textContent='Backend unavailable';
     document.getElementById('daily-volume-sub').textContent='Backend unavailable';
     if(showToast){
-      toast('⚠ Dashboard data API unavailable. Showing fallback visuals.');
+      toast(`⚠ Dashboard API unavailable: ${err.message}`);
     }
   }
 }
@@ -1163,7 +1180,7 @@ async function loadDashboardSummary(showToast=true){
     }
   }catch(err){
     if(showToast){
-      toast('⚠ Backend summary unavailable. Showing fallback demo values.');
+      toast(`⚠ Summary API unavailable: ${err.message}`);
     }
   }
 }
@@ -1408,7 +1425,7 @@ async function loadPredictionsData(showToast=true){
     document.getElementById('pred-dist-sub').textContent='Backend unavailable';
     document.getElementById('pred-top-sub').textContent='Backend unavailable';
     if(showToast){
-      toast('⚠ Predictions API unavailable.');
+      toast(`⚠ Predictions API unavailable: ${err.message}`);
     }
   }
 }
