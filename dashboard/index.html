@@ -638,6 +638,7 @@ async function fetchApi(path){
   const withQuery=path.includes('?')?`${path}&${cacheBust}`:`${path}?${cacheBust}`;
 
   const configuredBase=(window.__API_BASE_URL__||localStorage.getItem('ECOMML_API_BASE_URL')||'').trim().replace(/\/$/, '');
+  const renderFallbackBase='https://ecomml-studio.onrender.com';
   const origin=window.location.origin.replace(/\/$/, '');
   const isLocalHost=['localhost','127.0.0.1'].includes(window.location.hostname);
 
@@ -646,13 +647,19 @@ async function fetchApi(path){
     targets.push(`${configuredBase}${withQuery}`);
   }
   targets.push(`${origin}${withQuery}`);
+  if(!isLocalHost){
+    targets.push(`${renderFallbackBase}${withQuery}`);
+  }
   if(isLocalHost){
     targets.push(`http://127.0.0.1:5000${withQuery}`);
     targets.push(`http://localhost:5000${withQuery}`);
   }
 
+  // De-duplicate while preserving order, so retries are deterministic.
+  const uniqueTargets=[...new Set(targets)];
+
   let lastError=null;
-  for(const url of targets){
+  for(const url of uniqueTargets){
     try{
       const res=await fetch(url,{cache:'no-store'});
       if(!res.ok){
