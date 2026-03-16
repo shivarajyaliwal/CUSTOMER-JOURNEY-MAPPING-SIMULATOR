@@ -505,6 +505,17 @@ def _load_predictions_data():
 
     models = get_models()
 
+    predictions_report_path = BASE_DIR / "reports" / "predictions_report.json"
+    if predictions_report_path.exists():
+        cache_key = (str(predictions_report_path), predictions_report_path.stat().st_mtime)
+        if PREDICTIONS_CACHE is not None and PREDICTIONS_CACHE_KEY == cache_key:
+            return PREDICTIONS_CACHE, predictions_report_path, None
+        with open(predictions_report_path, encoding="utf-8") as f:
+            payload = json.load(f)
+        PREDICTIONS_CACHE = payload
+        PREDICTIONS_CACHE_KEY = cache_key
+        return payload, predictions_report_path, None
+
     candidate_files = sorted((PROJECT_DIR / "data_sample").glob("*.csv"))
     if not candidate_files:
         mode = "ml" if models is not None else "heuristic"

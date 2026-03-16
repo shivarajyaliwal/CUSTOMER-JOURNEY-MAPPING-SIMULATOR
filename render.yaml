@@ -4,7 +4,7 @@ services:
     env: python
     plan: free
     rootDir: ml
-    buildCommand: pip install -r requirements.txt && python train_models.py --synthetic-sessions 25000 --rf-tuning-iters 6
+    buildCommand: pip install -r requirements.txt
     startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
     healthCheckPath: /healthz
     autoDeploy: true
