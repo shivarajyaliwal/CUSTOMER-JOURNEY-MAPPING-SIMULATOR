@@ -1,4 +1,7 @@
 {
+  "source_data_paths": [
+    "../data_sample/2019-Oct.csv"
+  ],
   "overview": {
     "total_events": 1048575,
     "unique_users": 168899,
@@ -167,6 +170,5 @@
       1.99,
       2.87
     ]
-  },
-  "source": "2019-Oct.csv"
+  }
 }

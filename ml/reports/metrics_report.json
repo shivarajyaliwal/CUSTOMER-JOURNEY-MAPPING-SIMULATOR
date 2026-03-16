@@ -1,50 +1,50 @@
 {
   "logistic_regression": {
     "model": "Logistic Regression",
-    "accuracy": 0.8997,
-    "auc_roc": 0.7454,
-    "f1_score": 0.3381,
-    "precision": 0.2902,
-    "recall": 0.4051,
+    "accuracy": 0.8899,
+    "auc_roc": 0.7591,
+    "f1_score": 0.3331,
+    "precision": 0.2677,
+    "recall": 0.4406,
     "confusion_matrix": [
       [
-        84413,
-        6050
+        40626,
+        3542
       ],
       [
-        3632,
-        2473
+        1644,
+        1295
       ]
     ]
   },
   "random_forest": {
     "model": "Random Forest",
     "accuracy": 0.9548,
-    "auc_roc": 0.9389,
-    "f1_score": 0.541,
-    "precision": 0.7568,
-    "recall": 0.421,
+    "auc_roc": 0.938,
+    "f1_score": 0.5316,
+    "precision": 0.7534,
+    "recall": 0.4107,
     "confusion_matrix": [
       [
-        89637,
-        826
+        43773,
+        395
       ],
       [
-        3535,
-        2570
+        1732,
+        1207
       ]
     ]
   },
   "kmeans": {
     "model": "K-Means",
     "k": 4,
-    "inertia": 2762338.59,
-    "silhouette_score": 0.4687,
+    "inertia": 1373442.16,
+    "silhouette_score": 0.3073,
     "cluster_sizes": {
-      "0": 403215,
-      "1": 13821,
-      "2": 10,
-      "3": 65792
+      "0": 122979,
+      "1": 37131,
+      "2": 17395,
+      "3": 58029
     }
   }
 }
