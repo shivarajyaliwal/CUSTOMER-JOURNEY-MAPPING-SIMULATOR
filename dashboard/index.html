@@ -199,10 +199,162 @@ body{font-family:'DM Sans',sans-serif;background:#F8F7F4;color:#1a1a1a;min-heigh
 /* TOAST */
 #toast{position:fixed;bottom:24px;right:24px;background:#1a1a1a;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;z-index:9999}
 #toast.show{opacity:1;transform:translateY(0)}
+
+body.dark-mode{background:#111827;color:#E5E7EB}
+body.dark-mode .sidebar,
+body.dark-mode .header,
+body.dark-mode .card,
+body.dark-mode .metric-card,
+body.dark-mode .form-input,
+body.dark-mode .form-select,
+body.dark-mode .search-input,
+body.dark-mode .scenario-card,
+body.dark-mode .step-tab,
+body.dark-mode .btn,
+body.dark-mode .result-body,
+body.dark-mode .data-table tr:hover td{background:#111827}
+body.dark-mode .sidebar,
+body.dark-mode .header,
+body.dark-mode .card,
+body.dark-mode .metric-card,
+body.dark-mode .model-item,
+body.dark-mode .result-panel,
+body.dark-mode .scenario-card,
+body.dark-mode .step-tabs,
+body.dark-mode .step-tab,
+body.dark-mode .search-input,
+body.dark-mode .form-input,
+body.dark-mode .form-select,
+body.dark-mode .btn,
+body.dark-mode .data-table th,
+body.dark-mode .data-table td,
+body.dark-mode .result-model-row,
+body.dark-mode .form-divider,
+body.dark-mode .step-nav,
+body.dark-mode .logo{border-color:#243244}
+body.dark-mode .sidebar,
+body.dark-mode .header,
+body.dark-mode .card,
+body.dark-mode .metric-card,
+body.dark-mode .model-item,
+body.dark-mode .result-body,
+body.dark-mode .result-panel,
+body.dark-mode .search-input,
+body.dark-mode .form-input,
+body.dark-mode .form-select,
+body.dark-mode .btn,
+body.dark-mode .step-tab,
+body.dark-mode .scenario-card{background:#0F172A}
+body.dark-mode .app-shell-overlay{background:rgba(2,6,23,.62)}
+body.dark-mode .logo h2,
+body.dark-mode .header-title,
+body.dark-mode .card-title,
+body.dark-mode .metric-value,
+body.dark-mode .model-name,
+body.dark-mode .fi-val,
+body.dark-mode .journey-event-title,
+body.dark-mode .journey-detail-row span:last-child,
+body.dark-mode .result-model-name,
+body.dark-mode .scenario-title,
+body.dark-mode .compare-table td:first-child,
+body.dark-mode .slider-val,
+body.dark-mode .insight-text b,
+body.dark-mode .search-input,
+body.dark-mode .form-input,
+body.dark-mode .form-select,
+body.dark-mode .data-table td,
+body.dark-mode .nav-item:hover{color:#F8FAFC}
+body.dark-mode .logo p,
+body.dark-mode .header-sub,
+body.dark-mode .metric-label,
+body.dark-mode .metric-delta.neutral,
+body.dark-mode .card-sub,
+body.dark-mode .legend-item,
+body.dark-mode .funnel-label,
+body.dark-mode .funnel-rate,
+body.dark-mode .fi-label,
+body.dark-mode .conf-label,
+body.dark-mode .journey-event-time,
+body.dark-mode .journey-detail-row span:first-child,
+body.dark-mode .pred-sub,
+body.dark-mode .form-label,
+body.dark-mode .form-input-hint,
+body.dark-mode .step-progress,
+body.dark-mode .scenario-desc,
+body.dark-mode .scenario-stat,
+body.dark-mode .compare-table th,
+body.dark-mode .nav-section,
+body.dark-mode .nav-item,
+body.dark-mode .section-title{color:#94A3B8}
+body.dark-mode .nav-item:hover,
+body.dark-mode .filter-chip,
+body.dark-mode .journey-event-details,
+body.dark-mode .cluster-item,
+body.dark-mode .insight-item,
+body.dark-mode .funnel-bar-wrap,
+body.dark-mode .score-bar-bg,
+body.dark-mode .fi-bar-bg,
+body.dark-mode .result-bar-wrap,
+body.dark-mode .prob-bar-bg,
+body.dark-mode .scenario-card.selected,
+body.dark-mode .scenario-card:hover{background:#172033}
+body.dark-mode .btn{color:#E5E7EB;border-color:#314155}
+body.dark-mode .btn:hover{background:#172033}
+body.dark-mode .btn.primary{background:#E5E7EB;color:#0F172A;border-color:#E5E7EB}
+body.dark-mode .btn.primary:hover{background:#CBD5E1}
+body.dark-mode .nav-item.active,
+body.dark-mode .filter-chip.active,
+body.dark-mode .step-tab.active{background:#E5E7EB;color:#0F172A}
+body.dark-mode .nav-item.active .nav-badge,
+body.dark-mode .step-tab.active .step-num{background:rgba(15,23,42,.08);color:#0F172A}
+body.dark-mode .prediction-box{background:linear-gradient(135deg,#0B1220 0%,#172033 100%)}
+body.dark-mode #toast{background:#E5E7EB;color:#111827}
+body.dark-mode .content::-webkit-scrollbar-thumb{background:#475569}
+
+.header-actions .menu-btn{display:none}
+.app-shell-overlay{display:none}
+
+@media (max-width: 1180px){
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .grid-2,.grid-3,.grid-12,.grid-21,.grid-13,.scenario-grid,.form-grid{grid-template-columns:1fr}
+}
+
+@media (max-width: 920px){
+  body{overflow:hidden}
+  .app{height:100dvh;position:relative}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:30;transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 24px 48px rgba(15,23,42,.18)}
+  body.sidebar-open .sidebar{transform:translateX(0)}
+  .app-shell-overlay{display:block;position:fixed;inset:0;background:rgba(15,23,42,.24);opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:20}
+  body.sidebar-open .app-shell-overlay{opacity:1;pointer-events:auto}
+  .main{min-width:0}
+  .header{padding:14px 18px;gap:12px}
+  .content{padding:18px}
+  .header-actions{flex-wrap:wrap;justify-content:flex-end}
+  .header-actions .menu-btn{display:inline-flex;align-items:center;justify-content:center}
+}
+
+@media (max-width: 640px){
+  .metrics{grid-template-columns:1fr}
+  .header{align-items:flex-start;flex-direction:column}
+  .header-actions{width:100%;justify-content:space-between}
+  .header-actions .btn{flex:1}
+  .header-actions .menu-btn{flex:0 0 auto}
+  .content{padding:14px}
+  .card,.metric-card,.prediction-box,.result-body,.result-header{padding:15px 16px}
+  .result-big-score{font-size:40px}
+  .model-score,.metric-value,.pred-value{font-size:22px}
+  .compare-table,.data-table{display:block;overflow-x:auto;white-space:nowrap}
+  .funnel-row{align-items:flex-start;flex-direction:column;gap:6px}
+  .funnel-label,.funnel-rate{width:auto;text-align:left}
+  .funnel-bar-wrap{width:100%}
+  .journey-event{gap:10px}
+  #toast{left:14px;right:14px;bottom:14px}
+}
 </style>
 </head>
 <body>
 <div id="toast"></div>
+<div class="app-shell-overlay" onclick="closeSidebar()"></div>
 <div class="app">
   <div class="sidebar">
     <div class="logo"><h2>EcomML Studio</h2><p>Customer Journey Mapping</p></div>
@@ -227,6 +379,8 @@ body{font-family:'DM Sans',sans-serif;background:#F8F7F4;color:#1a1a1a;min-heigh
         <div class="header-sub" id="page-sub">Loading backend metrics...</div>
       </div>
       <div class="header-actions">
+        <button class="btn menu-btn" type="button" onclick="toggleSidebar()">Menu</button>
+        <button class="btn" type="button" id="theme-toggle" onclick="toggleTheme()">Dark Mode</button>
         <button class="btn" onclick="handleRefresh()">↻ Refresh</button>
         <button class="btn primary" onclick="handleExport()">↓ Export</button>
       </div>
@@ -705,6 +859,24 @@ const PAGE_META={
   newcust:['New Customer Prediction','Step-by-step onboarding prediction wizard'],
 };
 let currentPage='dashboard';
+function applyTheme(theme){
+  const isDark=theme==='dark';
+  document.body.classList.toggle('dark-mode',isDark);
+  const toggle=document.getElementById('theme-toggle');
+  if(toggle){
+    toggle.textContent=isDark?'Light Mode':'Dark Mode';
+  }
+  localStorage.setItem('ECOMML_THEME',isDark?'dark':'light');
+}
+function toggleTheme(){
+  applyTheme(document.body.classList.contains('dark-mode')?'light':'dark');
+}
+function closeSidebar(){
+  document.body.classList.remove('sidebar-open');
+}
+function toggleSidebar(){
+  document.body.classList.toggle('sidebar-open');
+}
 function showPage(name,btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
@@ -713,6 +885,9 @@ function showPage(name,btn){
   document.getElementById('page-title').textContent=PAGE_META[name][0];
   document.getElementById('page-sub').textContent=PAGE_META[name][1];
   currentPage=name;
+  if(window.innerWidth<=920){
+    closeSidebar();
+  }
 }
 
 // ═══════════════════════════════════════════
@@ -1494,6 +1669,14 @@ window.prChartInstance=new Chart(document.getElementById('prChart'),{type:'scatt
 new Chart(document.getElementById('journeyDonut'),{type:'doughnut',data:{labels:['Views','Cart','Purchase'],datasets:[{data:[22,5,3],backgroundColor:['#3B82F6','#F59E0B','#10B981'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'right',labels:{font:{...FT,size:11},color:'#333',boxWidth:10,padding:8}}},cutout:'65%'}});
 
 updateNewCustPreview();
+const storedTheme=localStorage.getItem('ECOMML_THEME');
+const preferredTheme=storedTheme||(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+applyTheme(preferredTheme);
+window.addEventListener('resize',()=>{
+  if(window.innerWidth>920){
+    closeSidebar();
+  }
+});
 loadDashboardSummary(false);
 loadDashboardData(false);
 loadPredictionsData(false);
