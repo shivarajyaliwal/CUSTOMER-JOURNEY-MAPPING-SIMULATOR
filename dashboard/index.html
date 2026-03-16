@@ -591,6 +591,9 @@ const MODEL_LABELS={random_forest:'Random Forest',logistic_regression:'Logistic 
 let latestDashboardSummary=null;
 let latestDashboardData=null;
 let latestPredictionsData=null;
+let dashboardDataRetryTimer=null;
+let dashboardSummaryRetryTimer=null;
+let predictionsRetryTimer=null;
 
 // seeded rand
 function rand(s){let x=Math.sin(s)*10000;return x-Math.floor(x);}
@@ -1075,17 +1078,27 @@ async function loadDashboardData(showToast=true){
   try{
     const payload=await fetchApi('/api/dashboard-data');
     applyDashboardData(payload);
+    if(dashboardDataRetryTimer){
+      clearTimeout(dashboardDataRetryTimer);
+      dashboardDataRetryTimer=null;
+    }
     if(showToast){
       toast('✓ Synced dashboard events from backend data');
     }
   }catch(err){
-    document.getElementById('m-events-d').textContent='Backend unavailable';
-    document.getElementById('m-users-d').textContent='Backend unavailable';
-    document.getElementById('m-prate-d').textContent='Backend unavailable';
-    document.getElementById('m-cart-d').textContent='Backend unavailable';
-    document.getElementById('daily-volume-sub').textContent='Backend unavailable';
+    document.getElementById('m-events-d').textContent='Retrying backend...';
+    document.getElementById('m-users-d').textContent='Retrying backend...';
+    document.getElementById('m-prate-d').textContent='Retrying backend...';
+    document.getElementById('m-cart-d').textContent='Retrying backend...';
+    document.getElementById('daily-volume-sub').textContent='Retrying backend...';
     if(showToast){
       toast(`⚠ Dashboard API unavailable: ${err.message}`);
+    }
+    if(!dashboardDataRetryTimer){
+      dashboardDataRetryTimer=setTimeout(()=>{
+        dashboardDataRetryTimer=null;
+        loadDashboardData(false);
+      }, 5000);
     }
   }
 }
@@ -1182,12 +1195,22 @@ async function loadDashboardSummary(showToast=true){
   try{
     const payload=await fetchApi('/api/dashboard-summary');
     applyDashboardSummary(payload);
+    if(dashboardSummaryRetryTimer){
+      clearTimeout(dashboardSummaryRetryTimer);
+      dashboardSummaryRetryTimer=null;
+    }
     if(showToast){
       toast('✓ Synced latest metrics from backend models');
     }
   }catch(err){
     if(showToast){
       toast(`⚠ Summary API unavailable: ${err.message}`);
+    }
+    if(!dashboardSummaryRetryTimer){
+      dashboardSummaryRetryTimer=setTimeout(()=>{
+        dashboardSummaryRetryTimer=null;
+        loadDashboardSummary(false);
+      }, 5000);
     }
   }
 }
@@ -1424,15 +1447,25 @@ async function loadPredictionsData(showToast=true){
   try{
     const payload=await fetchApi('/api/predictions-data');
     applyPredictionsData(payload);
+    if(predictionsRetryTimer){
+      clearTimeout(predictionsRetryTimer);
+      predictionsRetryTimer=null;
+    }
     if(showToast){
       toast('✓ Synced predictions from backend models');
     }
   }catch(err){
-    document.getElementById('pred-m1-d').textContent='Backend unavailable';
-    document.getElementById('pred-dist-sub').textContent='Backend unavailable';
-    document.getElementById('pred-top-sub').textContent='Backend unavailable';
+    document.getElementById('pred-m1-d').textContent='Retrying backend...';
+    document.getElementById('pred-dist-sub').textContent='Retrying backend...';
+    document.getElementById('pred-top-sub').textContent='Retrying backend...';
     if(showToast){
       toast(`⚠ Predictions API unavailable: ${err.message}`);
+    }
+    if(!predictionsRetryTimer){
+      predictionsRetryTimer=setTimeout(()=>{
+        predictionsRetryTimer=null;
+        loadPredictionsData(false);
+      }, 5000);
     }
   }
 }

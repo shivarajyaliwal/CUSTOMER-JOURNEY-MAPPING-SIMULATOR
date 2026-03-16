@@ -29,6 +29,14 @@ PREDICTIONS_CACHE = None
 PREDICTIONS_CACHE_KEY = None
 
 
+@app.after_request
+def add_no_cache_headers(response):
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+
 def _build_dashboard_data_from_raw(df):
     event_type = df.get("event_type", pd.Series(dtype="object")).fillna("unknown")
     views = int((event_type == "view").sum())
